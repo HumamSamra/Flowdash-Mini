@@ -1,0 +1,23 @@
+.form-check-input, .form-check-label {
+    cursor: pointer !important
+}
+
+.select2-selection__choice__remove {
+    cursor: pointer !important
+}
+
+.swal2-container {
+    z-index: 2000 !important
+}
+
+.clickable-redirect {
+    cursor: pointer !important
+}
+
+    .clickable-redirect:hover {
+        background: rgba(0, 0, 0, 0.08) !important
+    }
+
+select {
+    cursor: pointer !important
+}

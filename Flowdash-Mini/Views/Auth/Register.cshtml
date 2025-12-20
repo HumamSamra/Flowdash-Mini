@@ -1,0 +1,129 @@
+﻿@using Flowdash_Mini.ViewModels.Accounts
+@using Microsoft.Extensions.Options
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Register";
+    TempData["HideLayout"] = true;
+}
+@inject IOptions<CaptchaOptions> captcha
+@model RegisterVM
+
+@section Styles {
+    <!-- Page -->
+    <link rel="stylesheet" href="../assets/vendor/css/pages/page-auth.css" />
+}
+
+<!-- Content -->
+<div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+            <!-- Register Card -->
+            <div class="card">
+                <div class="card-body">
+                    <!-- Logo -->
+                    <div class="app-brand justify-content-center">
+                        <a href="/" class="app-brand-link gap-2">
+                            <span class="app-brand-logo demo">
+                                <img src="~/images/logo.png" height="80" />
+                            </span>
+                        </a>
+                    </div>
+                    <!-- /Logo -->
+
+                    <h4 class="mb-2">Adventure starts here 🚀</h4>
+                    <p class="mb-4">Make your app management easy and fun!</p>
+
+                    <form id="formAuthentication" class="mb-3 extra-validate" novalidate action="/admin/auth/register" method="POST">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">Full name</label>
+                            <input dir="auto" type="text"
+                                   asp-for="FullName"
+                                   class="form-control"
+                                   id="fullname"
+                                   placeholder="Enter your full name"
+                                   autofocus required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input dir="auto" type="text"
+                                   asp-for="UserName"
+                                   class="form-control"
+                                   id="username"
+                                   name="username"
+                                   placeholder="Enter your username"
+                                   autofocus required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input dir="auto" type="email" asp-for="Email" class="form-control" id="email" name="email" placeholder="Enter your email" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="rgkey" class="form-label">Register Key</label>
+                            <input dir="auto" type="text" asp-for="RegisterKey" class="form-control" id="rgkey" placeholder="Enter the Register Key" required />
+                        </div>
+                        <div class="mb-3 form-password-toggle">
+                            <label class="form-label" for="password">Password</label>
+                            <div class="input-group input-group-merge">
+                                <input dir="auto" type="password"
+                                       id="password"
+                                       asp-for="Password"
+                                       class="form-control"
+                                       name="password"
+                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                       aria-describedby="password" required />
+                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <ul class="mb-0">
+                                        <li>@error.ErrorMessage</li>
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            }
+                        }
+
+                        <button class="g-recaptcha btn btn-primary d-grid w-100"
+                                data-sitekey="@captcha.Value.SiteKey"
+                                data-callback='onSubmit'
+                                data-action='submit'>
+                            Sign up
+                        </button>
+                    </form>
+
+                    <p class="text-center">
+                        <span>Already have an account?</span>
+                        <a href="/admin/auth/login">
+                            <span>Sign in instead</span>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <!-- Register Card -->
+        </div>
+    </div>
+</div>
+<!-- / Content -->
+@section Scripts {
+    <script>
+        function onSubmit() {
+            const form = document.querySelector('#formAuthentication');
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            form.submit();
+        }
+    </script>
+}

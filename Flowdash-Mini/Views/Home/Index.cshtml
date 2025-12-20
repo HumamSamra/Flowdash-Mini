@@ -1,0 +1,163 @@
+﻿@using Flowdash_Mini.Extensions
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="row">
+    <div class="col-lg-8 mb-4 order-0">
+        <div class="card">
+            <div class="d-flex align-items-end row">
+                <div class="col-sm-7">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Welcome Back @User.GetUserName()! 🎉</h5>
+                        <p class="mb-4">
+                            You can <span class="fw-bold">control</span> and <span class="fw-bold">navigate</span> your website totally from the dashboard panel.
+                        </p>
+
+                        <a href="/admin/appsettings" class="btn btn-sm btn-outline-primary">open settings</a>
+                    </div>
+                </div>
+                <div class="col-sm-5 text-center text-sm-left">
+                    <div class="card-body pb-0 px-0 px-md-4">
+                        <img src="~/admin/assets/img/illustrations/man-with-laptop-light.png"
+                             height="140"
+                             alt="View Badge User"
+                             data-app-dark-img="illustrations/man-with-laptop-dark.png"
+                             data-app-light-img="illustrations/man-with-laptop-light.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-4 order-1">
+        <div class="row">
+            <div class="col-lg-6 col-md-12 col-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                                <img src="~/admin/assets/img/icons/unicons/chart.png"
+                                     alt="chart success"
+                                     class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn p-0"
+                                        type="button"
+                                        id="cardOpt3"
+                                        data-bs-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                    <a class="dropdown-item" href="/admin/users">View all</a>
+                                    <a class="dropdown-item refresh-btn" href="javascript:void(0);">Refresh</a>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="fw-semibold d-block mb-1">Users</span>
+                        <h3 class="card-title mb-2"><small>Currently:</small> @ViewBag.TotalUsers</h3>
+                        <small class="text-secondary fw-semibold"><i class="bx bx-calendar"></i> @(((DateTime)ViewBag.LastUser).ToString("dd MMM, yy")) </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                                <img src="~/admin/assets/img/icons/unicons/chart-success.png"
+                                     alt="chart success"
+                                     class="rounded" />
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn p-0"
+                                        type="button"
+                                        id="cardOpt3"
+                                        data-bs-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                    <a class="dropdown-item" href="/admin/orders">View all</a>
+                                    <a class="dropdown-item refresh-btn" href="javascript:void(0);">Refresh</a>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="fw-semibold d-block mb-1">Orders</span>
+                        <h3 class="card-title mb-2"><small>Currently:</small> @ViewBag.TotalOrders</h3>
+                        <small class="text-secondary fw-semibold"><i class="bx bx-calendar"></i> @(((DateTime)ViewBag.LastOrder).ToString("dd MMM, yy")) </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <!-- Transactions -->
+    <div class="col-md-12 order-2 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="card-title m-0 me-2">Website Statistics</h5>
+                <div class="dropdown">
+                    <button class="btn p-0"
+                            type="button"
+                            id="transactionID"
+                            data-bs-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="transactionID">
+                        <a class="dropdown-item" href="/admin/appsettings">Settings</a>
+                        <a class="dropdown-item refresh-btn" href="javascript:void(0);">Refresh</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <ul class="p-0 m-0">
+                    <li class="d-flex mb-4 pb-1">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <img src="~/admin/assets/img/icons/unicons/chart.png" alt="User" class="rounded" />
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="text-muted d-block mb-1">Users</small>
+                                <h6 class="mb-0">Total of @ViewBag.TotalUsers User</h6>
+                            </div>
+                            <a href="/admin/users" class="user-progress d-flex align-items-center gap-1">
+                                <h6 class="mb-0">View all</h6>
+                                <span class="text-muted"><i class='bx  bx-chevron-right'></i> </span>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="d-flex mb-4 pb-1">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <img src="~/admin/assets/img/icons/unicons/wallet.png" alt="User" class="rounded" />
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="text-muted d-block mb-1">Orders</small>
+                                <h6 class="mb-0">Total of @ViewBag.TotalOrders Order</h6>
+                            </div>
+                            <a href="/admin/orders" class="user-progress d-flex align-items-center gap-1">
+                                <h6 class="mb-0">View all</h6>
+                                <span class="text-muted"><i class='bx  bx-chevron-right'></i> </span>
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--/ Transactions -->
+</div>
+
+@section Scripts {
+    <script>
+        $('#admin-mbtn').addClass('active')
+    </script>
+}

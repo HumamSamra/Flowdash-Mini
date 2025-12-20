@@ -1,0 +1,133 @@
+﻿@using Flowdash_Mini.ViewModels.Accounts
+@using Microsoft.Extensions.Options
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Login";
+    TempData["HideLayout"] = true;
+}
+@inject IOptions<CaptchaOptions> captcha
+@model LoginVM
+
+@section Styles {
+    <!-- Page -->
+    <link rel="stylesheet" href="~/admin/assets/vendor/css/pages/page-auth.css" />
+}
+
+<!-- Content -->
+<div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+            <!-- Login -->
+            <div class="card">
+                <div class="card-body">
+                    <!-- Logo -->
+                    <div class="app-brand justify-content-center">
+                        <a href="/" class="app-brand-link gap-2">
+                            <span class="app-brand-logo demo">
+                                <img src="~/images/logo.png" height="80" />
+                            </span>
+                        </a>
+                    </div>
+                    <!-- /Logo -->
+
+                    <h4 class="mb-2">Welcome to Flowdash! 👋</h4>
+                    <p class="mb-4">Please sign-in to your account to gain access</p>
+
+                    <form id="formAuthentication" class="mb-3 extra-validate" novalidate action="/admin/auth/login" method="POST">
+                        <input dir="auto" type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                        <input dir="auto" name="returnUrl" value="@ViewBag.ReturnUrl" hidden />
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email or Username</label>
+                            <input dir="auto" type="text"
+                                   class="form-control"
+                                   asp-for="Account"
+                                   id="email"
+                                   placeholder="Enter your email or username"
+                                   autofocus required />
+                        </div>
+                        <div class="mb-3 form-password-toggle">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" for="password">Password</label>
+                                <a href="#">
+                                    <small>Forgot Password?</small>
+                                </a>
+                            </div>
+                            <div class="input-group input-group-merge">
+                                <input dir="auto" type="password"
+                                       id="password"
+                                       asp-for="Password"
+                                       class="form-control"
+                                       name="password"
+                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                       aria-describedby="password" required/>
+                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input dir="auto" asp-for="SaveLogin" class="form-check-input" type="checkbox" id="remember-me" />
+                                <label class="form-check-label" for="remember-me"> Remember Me </label>
+                            </div>
+                        </div>
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <ul class="mb-0">
+                                        <li>@error.ErrorMessage</li>
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            }
+                        }
+                        <div class="mb-3">
+                            <button id="submit-login-form" class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                        </div>
+                    </form>
+
+                    <p class="text-center">
+                        <span>New on our platform?</span>
+                        <a href="/admin/auth/register">
+                            <span>Create an account</span>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <!-- /Login -->
+        </div>
+    </div>
+</div>
+<!-- / Content -->
+@section Scripts {
+    <script>
+        function onSubmit() {
+            const form = document.querySelector('#formAuthentication');
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            form.submit();
+        }
+
+        document.getElementById('submit-login-form').addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('form');
+
+            grecaptcha.ready(function() {
+                grecaptcha.execute('@captcha.Value.SiteKey.ToString()', { action: 'download' })
+                .then(function(token) {
+                    form.querySelector('input[name="g-recaptcha-response"]').value = token;
+                    form.submit();
+                });
+            });
+        });
+    </script>
+}
