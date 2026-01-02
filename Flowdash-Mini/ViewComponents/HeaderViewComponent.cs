@@ -4,7 +4,7 @@ using Flowdash_Mini.ViewModels.Settings;
 using Flowdash_Mini.ViewModels.Views;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Al_Madinah_Reparing.ViewComponents
+namespace Flowdash_Mini.ViewComponents
 {
     public class HeaderViewComponent : ViewComponent
     {

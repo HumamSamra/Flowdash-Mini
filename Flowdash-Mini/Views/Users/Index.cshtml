@@ -1,0 +1,229 @@
+﻿@using Flowdash_Mini.Extensions
+@using Flowdash_Mini.ViewModels.Accounts
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Users";
+    int x = 1;
+}
+@model List<AppUserVM>
+
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold py-3 mb-4"><a href="" class="text-muted fw-light">Dashboard /</a> Users</h4>
+        <div class="d-flex gap-3 align-items-center justify-content-center">
+            <a href="/users/create" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                <i class="bx bx-plus"></i> <span>Create</span>
+            </a>
+            <a href="javascript:void(0);" class="refresh-btn btn btn-outline-secondary d-flex justify-content-center align-items-center gap-2">
+                <i class="bx bx-refresh"></i> <span>Refresh</span>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <h5 class="card-header">View users</h5>
+                <div class="card-body">
+                    <div class="table-responsive table-responsive text-nowrap">
+                        <table class="table table-bordered data-table-list">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        #
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Full name</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Username</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Email</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Verification</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Actions</h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="text-start">
+                                            <h6>@(x++)</h6>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 align-items-center justify-content-start">
+                                                <h6 class="m-0">
+                                                    @item.FullName
+                                                </h6>
+                                                <i class="ti ti-info-circle"
+                                                   style="cursor:pointer"
+                                                   data-bs-toggle="tooltip"
+                                                   title="@item.Id"></i>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6>@item.UserName</h6>
+                                        </td>
+                                        <td>
+                                            <h6>@item.Email</h6>
+                                        </td>
+                                        <td>
+                                            @if (item.EmailConfirmed)
+                                            {
+                                                <span class="badge bg-label-success rounded-pill d-flex gap-2 align-items-center justify-content-center px-2">
+                                                    <i class='bx  bx-check-circle'></i>
+                                                    <span>Email Confirmed</span>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-label-warning rounded-pill d-flex gap-2 align-items-center justify-content-center px-2">
+                                                    <i class='bx  bx-help-circle'></i>
+                                                    <span>Email Not Confirmed</span>
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="true">
+                                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="/users/edit/@item.Id"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    @if (!item.IsLockedout)
+                                                    {
+                                                        @if (item.Id != User.GetUserId())
+                                                        {
+                                                            <a class="dropdown-item text-danger" name="deactivate-user"
+                                                               id="@item.Id" href="javascript:void(0);"><i class="bx bx-lock me-1"></i> Lock User</a>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <a class="dropdown-item text-danger" name="activate-user"
+                                                           id="@item.Id" href="javascript:void(0);"><i class="bx bx-lock-open me-1"></i> Unlock User</a>
+                                                    }
+                                                    @if (item.Id != User.GetUserId())
+                                                    {
+                                                        <a class="dropdown-item text-danger" name="delete"
+                                                           id="@item.Id" href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Delete</a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(() => {
+            $('#user-mbtn').addClass('active');
+
+            $(document).on('click', 'a[name="force-delete"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You can't undo this action!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post(`/users/forcedelete/${$(this).attr("id")}`)
+                            .fail(xhr => {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                    icon: "error"
+                                });
+                            })
+                            .done(() => {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "User Deleted Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            })
+                    }
+                });
+            });
+
+            $(document).on('click', 'a[name="activate-user"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This user will be activated",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, activate it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post(`/users/SetUserState?id=${$(this).attr('id')}&active=true`)
+                            .fail(xhr => {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                    icon: "error"
+                                });
+                            })
+                            .done(() => {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "User Activated Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            })
+                    }
+                });
+            });
+
+            $(document).on('click', 'a[name="deactivate-user"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This user will be deactivated!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, deactivate it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post(`/users/SetUserState?id=${$(this).attr("id")}&active=false`)
+                            .fail(xhr => {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                    icon: "error"
+                                });
+                            })
+                            .done(() => {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "User Deactivated Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            })
+                    }
+                });
+            });
+        })
+    </script>
+}

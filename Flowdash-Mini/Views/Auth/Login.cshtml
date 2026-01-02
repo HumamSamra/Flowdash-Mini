@@ -15,119 +15,269 @@
     <link rel="stylesheet" href="~/admin/assets/vendor/css/pages/page-auth.css" />
 }
 
-<!-- Content -->
-<div class="container-xxl">
-    <div class="authentication-wrapper authentication-basic container-p-y">
-        <div class="authentication-inner">
-            <!-- Login -->
-            <div class="card">
-                <div class="card-body">
-                    <!-- Logo -->
-                    <div class="app-brand justify-content-center">
-                        <a href="/" class="app-brand-link gap-2">
-                            <span class="app-brand-logo demo">
-                                <img src="~/images/logo.png" height="80" />
-                            </span>
-                        </a>
+@if (ViewBag.Succeeded == true)
+{
+    <!-- Content -->
+    <div class="container-xxl">
+        <div class="authentication-wrapper authentication-basic container-p-y">
+            <div class="authentication-inner py-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Logo -->
+                        <div class="app-brand justify-content-center">
+                            <a href="/" class="app-brand-link gap-2">
+                                <span class="app-brand-logo demo">
+                                    <img src="~/images/logo.png" height="80" />
+                                </span>
+                            </a>
+                        </div>
+                        <!-- /Logo -->
+                        <h4 class="mb-2">E-Mail Confirmation</h4>
+                        <p class="mb-4">E-Mail Confirmation Message has been sent to your account @ViewBag.Email, Please check your mail box and click on the link to confirm your email.</p>
+                        <div class="text-center">
+                            <a href="/auth/login" class="d-flex align-items-center justify-content-center">
+                                <i class="bx bx-chevron-left scaleX-n1-rtl bx-sm"></i>
+                                Back to login
+                            </a>
+                        </div>
                     </div>
-                    <!-- /Logo -->
-
-                    <h4 class="mb-2">Welcome to Flowdash! 👋</h4>
-                    <p class="mb-4">Please sign-in to your account to gain access</p>
-
-                    <form id="formAuthentication" class="mb-3 extra-validate" novalidate action="/admin/auth/login" method="POST">
-                        <input dir="auto" type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
-                        <input dir="auto" name="returnUrl" value="@ViewBag.ReturnUrl" hidden />
-
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+                    <span class="flex-grow-1"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form novalidate class="extra-validate" id="forgot-pwd-form">
+                        <input type="hidden" id="g-recaptcha-response1" name="g-recaptcha-response">
                         @Html.AntiForgeryToken()
-
+                        <p class="text-secondary">
+                            <b>How to reset your password?</b>
+                            <br />
+                            A message will be sent to your e-mail with the reset password link, please click on the link and proceed to reset your password
+                        </p>
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email or Username</label>
+                            <label for="email1" class="form-label">Email Address</label>
                             <input dir="auto" type="text"
                                    class="form-control"
-                                   asp-for="Account"
-                                   id="email"
-                                   placeholder="Enter your email or username"
+                                   name="email"
+                                   id="email1"
+                                   placeholder="Enter your Email"
                                    autofocus required />
                         </div>
-                        <div class="mb-3 form-password-toggle">
-                            <div class="d-flex justify-content-between">
-                                <label class="form-label" for="password">Password</label>
-                                <a href="#">
+                        <hr />
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                            <button type="submit" class="btn btn-primary disabled" id="forgot-pwd-submit">
+                                Confirm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="container-xxl">
+        <div class="authentication-wrapper authentication-basic container-p-y">
+            <div class="authentication-inner">
+                <!-- Login -->
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Logo -->
+                        <div class="app-brand justify-content-center">
+                            <a href="/" class="app-brand-link gap-2">
+                                <span class="app-brand-logo demo">
+                                    <img src="~/images/logo.png" height="80" />
+                                </span>
+                            </a>
+                        </div>
+                        <!-- /Logo -->
+
+                        <h4 class="mb-2">Welcome to Flowdash! 👋</h4>
+                        <p class="mb-4">Please sign-in to your account to gain access</p>
+
+                        <form id="formAuthentication" class="mb-3 extra-validate" novalidate action="/auth/login" method="POST">
+                            <input dir="auto" type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                            <input dir="auto" name="returnUrl" value="@ViewBag.ReturnUrl" hidden />
+
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email or Username</label>
+                                <input dir="auto" type="text"
+                                       class="form-control"
+                                       asp-for="Account"
+                                       id="email"
+                                       placeholder="Enter your email or username"
+                                       autofocus required />
+                            </div>
+                            <div class="mb-1 form-password-toggle">
+                                <div class="d-flex justify-content-start">
+                                    <label class="form-label" for="password">Password</label>
+                                </div>
+                                <div class="input-group input-group-merge">
+                                    <input dir="auto" type="password"
+                                           id="password"
+                                           asp-for="Password"
+                                           class="form-control"
+                                           name="password"
+                                           placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                           aria-describedby="password" required />
+                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                </div>
+                            </div>
+                            <div class="mb-1 d-flex justify-content-end">
+                                <a href="javascript:void(0);" id="forgot-pwd">
                                     <small>Forgot Password?</small>
                                 </a>
                             </div>
-                            <div class="input-group input-group-merge">
-                                <input dir="auto" type="password"
-                                       id="password"
-                                       asp-for="Password"
-                                       class="form-control"
-                                       name="password"
-                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                       aria-describedby="password" required/>
-                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input dir="auto" asp-for="SaveLogin" class="form-check-input" type="checkbox" id="remember-me" />
-                                <label class="form-check-label" for="remember-me"> Remember Me </label>
-                            </div>
-                        </div>
-                        @if (!ViewData.ModelState.IsValid)
-                        {
-                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                            {
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <ul class="mb-0">
-                                        <li>@error.ErrorMessage</li>
-                                    </ul>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input dir="auto" asp-for="SaveLogin" class="form-check-input" type="checkbox" id="remember-me" />
+                                    <label class="form-check-label" for="remember-me"> Remember Me (save login info) </label>
                                 </div>
+                            </div>
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <ul class="mb-0">
+                                            <li>@error.ErrorMessage</li>
+                                        </ul>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
                             }
-                        }
-                        <div class="mb-3">
-                            <button id="submit-login-form" class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
-                        </div>
-                    </form>
+                            <div class="mb-3">
+                                <button id="submit-login-form" class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                            </div>
+                        </form>
 
-                    <p class="text-center">
-                        <span>New on our platform?</span>
-                        <a href="/admin/auth/register">
-                            <span>Create an account</span>
-                        </a>
-                    </p>
+                        <p class="text-center">
+                            <span>New on our platform?</span>
+                            <a href="/auth/register">
+                                <span>Create an account</span>
+                            </a>
+                        </p>
+                    </div>
                 </div>
+                <!-- /Login -->
             </div>
-            <!-- /Login -->
         </div>
     </div>
-</div>
-<!-- / Content -->
-@section Scripts {
-    <script>
-        function onSubmit() {
-            const form = document.querySelector('#formAuthentication');
+    <!-- / Content -->
+    @section Scripts {
+        <script src="https://www.google.com/recaptcha/api.js?hl=en&render=@captcha.Value.SiteKey" async defer></script>
 
-            if (!form.checkValidity()) {
-                form.classList.add('was-validated');
-                return;
+        <script>
+            let captchaDone = false;
+            function onSubmit() {
+                const form = document.querySelector('#formAuthentication');
+
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                form.submit();
             }
 
-            form.submit();
-        }
+            $("#formAuthentication").on('submit', function (e) {
+                if (captchaDone) return;
 
-        document.getElementById('submit-login-form').addEventListener('click', function(e) {
-            e.preventDefault();
-            const form = this.closest('form');
+                e.preventDefault();
 
-            grecaptcha.ready(function() {
-                grecaptcha.execute('@captcha.Value.SiteKey.ToString()', { action: 'download' })
-                .then(function(token) {
-                    form.querySelector('input[name="g-recaptcha-response"]').value = token;
-                    form.submit();
+                const form = this;
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('@captcha.Value.SiteKey', { action: 'RESET_PASSWORD' })
+                        .then(function (token) {
+                            form.querySelector('input[name="g-recaptcha-response"]').value = token;
+                            captchaDone = true;
+                            form.submit();
+                        });
                 });
             });
-        });
-    </script>
+
+            $('#forgot-pwd').on('click', function(event) {
+                $('#forgotPasswordModal').modal('show')
+            })
+
+            $('#forgot-pwd-form').on('submit', function(e) {
+                    e.preventDefault();
+                    const form = $(this)
+
+                    grecaptcha.ready(function() {
+                        grecaptcha.execute('@captcha.Value.SiteKey.ToString()', { action: 'FORGOT_PASSWORD' })
+                        .then(function(captchaToken) {
+                            $('form#forgot-pwd-form')
+                              .find('[name="g-recaptcha-response"]')
+                              .val(captchaToken);
+                              try {
+                                showLoader();
+                                $.ajax({
+                                    url: '/auth/forgotpassword',
+                                    method: 'post',
+                                    data: $('#forgot-pwd-form').serialize(),
+                                    headers: {
+                                        'RequestVerificationToken': $('#forgot-pwd-form').find('input[name="__RequestVerificationToken"]').val()
+                                    },
+                                    success: function (data) {
+                                        hideLoader();
+                                        if(data.statusCode == 200) {
+                                            $('#forgotPasswordModal').modal('hide')
+                                            Swal.fire({
+                                              title: 'Reset Password',
+                                              html: 'Password reset link has been sent to your account successfully, please check your inbox and click on the link to reset your password.',
+                                              icon: "success"
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                              title: 'Error Occurred',
+                                              html: data.msg,
+                                              icon: "error"
+                                            });
+                                        }
+                                    }
+                                })
+                                .fail(function (jqXHR, textStatus, errorThrown) {
+                                    hideLoader();
+                                    Swal.fire({
+                                      title: 'Error Occurred',
+                                      html: errorThrown || 'Unknown Error Occurred',
+                                      icon: "error"
+                                    });
+                                })
+                            } catch (err) {
+                                hideLoader();
+                                Swal.fire({
+                                      title: 'Error Occurred',
+                                      html: err || 'Unknown Error Occurred',
+                                      icon: "error"
+                                    });
+                            }
+
+                            });
+                        });
+                    });
+        </script>
+    }
 }

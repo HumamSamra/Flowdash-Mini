@@ -2,7 +2,7 @@
 using Flowdash_Mini.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Al_Madinah_Reparing.ViewComponents
+namespace Flowdash_Mini.ViewComponents
 {
     public class SidebarViewComponent : ViewComponent
     {

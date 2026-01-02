@@ -1,0 +1,126 @@
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.Models.Projects
+@using Flowdash_Mini.ViewModels.Projects
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Project Members";
+    ProjectState state = ViewBag.ProjectState;
+    int x = 1;
+}
+@model List<ProjectMemberVM>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold py-3 mb-4"><a href="/project" class="text-muted fw-light">Project /</a> Members</h4>
+        <div class="d-flex gap-3 align-items-center justify-content-center">
+            @if (ViewBag.MemberType != MemberType.User && state == ProjectState.Private)
+            {
+                <a href="javascript:void(0);" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                    <i class="bx bx-envelope"></i> <span>Invite Members</span>
+                </a>
+            }
+            else if (state == ProjectState.Public)
+            {
+                <a href="javascript:void(0);" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                    <i class="bx bx-envelope"></i> <span>Add Members</span>
+                </a>
+            }
+            <a href="javascript:void(0);" class="refresh-btn btn btn-outline-secondary d-flex justify-content-center align-items-center gap-2">
+                <i class="bx bx-refresh-cw"></i> <span>Refresh</span>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <h5 class="card-header">View Members</h5>
+                <div class="card-body">
+                    <div class="table-responsive table-responsive text-nowrap">
+                        <table class="table table-bordered data-table-list">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        #
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Full name</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Joined at</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Member Type</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Actions</h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                                @if (Model.Count > 0)
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="text-start">
+                                                <h6 class="m-0">@(x++)</h6>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2 align-items-center justify-content-start">
+                                                    <h6 class="m-0">
+                                                        @item.Member?.FullName
+                                                    </h6>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <h6 class="m-0">@item.JoinedAt.ToString("dd MMM, yyyy")</h6>
+                                            </td>
+                                            <td>
+                                                @if (item.MemberType == MemberType.Owner)
+                                                {
+                                                    <span class="badge bg-label-warning text-warning">Owner</span>
+                                                }
+                                                else if (item.MemberType == MemberType.Admin)
+                                                {
+                                                    <span class="badge bg-label-success text-success">Admin</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-label-primary text-primary">User</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                                            data-bs-toggle="dropdown" aria-expanded="true">
+                                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="javascript:void(0))">
+                                                            <i class="bx bx-edit-alt me-1"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#members-mbtn').addClass('active')
+    </script>
+}

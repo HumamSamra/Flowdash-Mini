@@ -1,0 +1,20 @@
+﻿using AutoMapper;
+using Flowdash_Mini.Models.Projects;
+using Flowdash_Mini.ViewModels.Projects;
+
+namespace Flowdash_Mini.Profiles
+{
+    public class ProjectProfile : Profile
+    {
+        public ProjectProfile()
+        {
+            CreateMap<Project, ProjectVM>().ReverseMap();
+            CreateMap<Project, CreateProjectVM>().ReverseMap();
+            CreateMap<Project, EditProjectVM>()
+                .ForMember(e => e.DateRange, e => e.MapFrom(e => $"{e.StartDate} - {e.Deadline}"))
+                .ReverseMap();
+
+            CreateMap<ProjectMember, ProjectMemberVM>().ReverseMap();
+        }
+    }
+}

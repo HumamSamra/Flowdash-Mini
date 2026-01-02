@@ -1,0 +1,75 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "E-mail Confirmation";
+    TempData["HideLayout"] = true;
+}
+@section Styles {
+    <!-- Page -->
+    <link rel="stylesheet" href="~/admin/assets/vendor/css/pages/page-auth.css" />
+}
+@model bool
+
+@if (Model)
+{
+    <!-- Content -->
+    <div class="container-xxl">
+        <div class="authentication-wrapper authentication-basic container-p-y">
+            <div class="authentication-inner py-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Logo -->
+                        <div class="app-brand justify-content-center">
+                            <a href="/" class="app-brand-link gap-2">
+                                <span class="app-brand-logo demo">
+                                    <img src="~/images/logo.png" height="80" />
+                                </span>
+                            </a>
+                        </div>
+                        <!-- /Logo -->
+                        <h4 class="mb-2">Email Verified Successfully</h4>
+                        <p class="mb-4">Your E-Mail has been successfully confirmed, you can now login using your account.</p>
+                        <div class="text-center">
+                            <a href="/auth/login" class="d-flex align-items-center justify-content-center">
+                                <i class="bx bx-chevron-left scaleX-n1-rtl bx-sm"></i>
+                                Back to login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Content -->
+    <div class="container-xxl">
+        <div class="authentication-wrapper authentication-basic container-p-y">
+            <div class="authentication-inner py-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Logo -->
+                        <div class="app-brand justify-content-center">
+                            <a href="/" class="app-brand-link gap-2">
+                                <span class="app-brand-logo demo">
+                                    <img src="~/images/logo.png" height="80" />
+                                </span>
+                            </a>
+                        </div>
+                        <!-- /Logo -->
+                        <h4 class="mb-2">E-Mail Verification Failed</h4>
+                        <p class="mb-4">We couldn't verify your E-Mail, Please try again or contact us if the isssue persists.</p>
+                        <div class="text-center">
+                            <a href="/auth/login" class="d-flex align-items-center justify-content-center">
+                                <i class="bx bx-chevron-left scaleX-n1-rtl bx-sm"></i>
+                                Back to login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

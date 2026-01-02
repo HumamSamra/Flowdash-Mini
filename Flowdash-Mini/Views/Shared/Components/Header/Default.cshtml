@@ -55,23 +55,26 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="/users/user/@User.GetUserId()">
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="/users/user/@User.GetUserId()">
                             <i class="bx bx-user me-2"></i>
                             <span class="align-middle">My Profile</span>
                         </a>
                     </li>
+                    @if (ViewBag.MemberType != null)
+                    {
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="/selectproject">
+                                <i class="bx bx-arrow-left-right me-2"></i>
+                                <span class="align-middle">Switch Project</span>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="dropdown-divider"></div>
+                        </li>
+                    }
                     <li>
-                        <a class="dropdown-item" href="/appsettings">
-                            <i class="bx bx-cog me-2"></i>
-                            <span class="align-middle">Settings</span>
-                        </a>
-                    </li>
-                    <li>
-                        <div class="dropdown-divider"></div>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="/auth/logout">
-                            <i class="bx bx-power-off me-2"></i>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="/auth/logout">
+                            <i class="bx bx-power me-2"></i>
                             <span class="align-middle">Log Out</span>
                         </a>
                     </li>

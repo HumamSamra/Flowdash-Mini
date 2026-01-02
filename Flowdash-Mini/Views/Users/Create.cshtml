@@ -1,0 +1,121 @@
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.Extensions
+@using Flowdash_Mini.ViewModels.Accounts
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Create User";
+}
+@model CreateUserVM
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><a href="" class="text-muted fw-light">Dashboard /</a><a href="/users" class="text-muted fw-light"> Users /</a> Create User</h4>
+    <div class="row">
+        <!-- Basic with Icons -->
+        <div class="col-xxl">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Create new User</h5>
+                    <small class="text-muted float-end">(@DateTime.Now.ToString("dd MMM, yyyy hh:mm aa"))</small>
+                </div>
+                <div class="card-body">
+                    <form class="needs-validation extra-validate" novalidate action="/users/create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Full Name</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span id="basic-icon-default-company" class="input-group-text"><i class="bx bx-buildings"></i></span>
+                                    <input dir="auto" asp-for="FullName" type="text" id="basic-icon-default-company" class="form-control" placeholder="John Doe" aria-label="John Doe" aria-describedby="basic-icon-default-company2">
+                                </div>
+                                <div class="form-text">Write user's full name</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Username</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span id="basic-icon-default-fullname2" class="input-group-text"><i class="bx bx-user"></i></span>
+                                    <input dir="auto" asp-for="UserName" type="text" class="form-control" id="basic-icon-default-fullname" placeholder="JohnDoe" aria-label="JohnDoe" aria-describedby="basic-icon-default-fullname2">
+                                </div>
+                                <div class="form-text">Write user's username</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Email</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class="bx bx-envelope"></i></span>
+                                    <input dir="auto" type="email" id="basic-icon-default-email" asp-for="Email" class="form-control" placeholder="john.doe" aria-label="john.doe" aria-describedby="basic-icon-default-email2">
+                                    <span id="basic-icon-default-email2" class="input-group-text">@@example.com</span>
+                                </div>
+                                <div class="form-text">Write user E-Mail</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3 form-password-toggle">
+                            <label class="col-sm-2 form-label" for="basic-icon-default-message">Roles</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span id="basic-icon-default-message2" class="input-group-text"><i class="bx bx-bookmark"></i></span>
+                                    <select class="form-select mb-3" id="multiple-select-field" asp-for="Roles"
+                                            data-placeholder="--Select Roles--" multiple required>
+                                        @foreach (var item in Html.GetEnumSelectList<UserType>())
+                                        {
+                                            <option value="@item.Text">@item.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-text">Choose what user can do</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Password</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <input dir="auto" type="password"
+                                           id="password"
+                                           asp-for="Password"
+                                           class="form-control"
+                                           name="password"
+                                           placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                           aria-describedby="password" required />
+                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                </div>
+                                <div class="form-text">Write a secure password</div>
+                            </div>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <ul class="mb-0">
+                                        <li>@error.ErrorMessage</li>
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            }
+                        }
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#user-mbtn').addClass('active');
+    </script>
+}

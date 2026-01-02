@@ -19,12 +19,15 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Admin - @ViewData["Title"]</title>
+    <title>Flowdash - @ViewData["Title"]</title>
 
     <meta name="description" content="" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="~/images/logo.png" />
+
+    <!-- Icons. Uncomment required icon fonts -->
+    <link rel='stylesheet' href='~/admin/assets/fonts/boxicons/boxicons.min.css'>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -32,8 +35,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
           rel="stylesheet" />
 
-    <!-- Icons. Uncomment required icon fonts -->
-    <link rel="stylesheet" href="~/admin/assets/vendor/fonts/boxicons.css" />
+    <!--Swal Alert 2-->
+    <link rel="stylesheet" href="~/lib/sweetalert2/sweetalert2.min.css" />
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="~/admin/assets/vendor/css/core.css" class="template-customizer-core-css" />
@@ -63,10 +66,11 @@
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="~/admin/assets/js/config.js"></script>
-
-    <script src="https://www.google.com/recaptcha/api.js?hl=en&render=@captcha.Value.SiteKey" async defer></script>
 </head>
 <body>
+    <!--Loader-->
+    <div id="loader-overlay"></div>
+
     @if (!hideLayout)
     {
         <!-- Layout wrapper -->
@@ -124,8 +128,8 @@
     <script src="~/lib/datatable-bs5/dataTables.js"></script>
     <script src="~/lib/datatable-bs5/dataTables.bootstrap5.js"></script>
 
-    <!--Sweet Alert v2-->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!--Sweet Alert 2-->
+    <script src="~/lib/sweetalert2/sweetalert2.min.js"></script>
 
     <!--Multi Select 2-->
     <script src="~/lib/multi-select2/select2.full.min.js"></script>

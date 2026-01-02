@@ -1,0 +1,18 @@
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.ViewModels.Projects
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = Model.ProjectName;
+    MemberType mt = ViewBag.MemberType;
+}
+@model ProjectVM
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('#home-mbtn').addClass('active')
+        })
+    </script>
+}

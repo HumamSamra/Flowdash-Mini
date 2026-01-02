@@ -108,3 +108,11 @@ function copyText(selector) {
         title: "Text copied successfully"
     });
 }
+
+function showLoader() {
+    $("#loader-overlay").fadeIn(300); // 300ms fade in
+}
+
+function hideLoader() {
+    $("#loader-overlay").fadeOut(300); // 300ms fade out
+}

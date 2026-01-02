@@ -1,0 +1,224 @@
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.Extensions
+@using Flowdash_Mini.ViewModels.Accounts
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Edit User";
+}
+@model EditUserVM
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><a href="" class="text-muted fw-light">Dashboard /</a><a href="/users" class="text-muted fw-light"> Users /</a> Edit User</h4>
+    <div class="row mb-4">
+        <!-- Basic with Icons -->
+        <div class="col-xxl">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Edit User</h5>
+                    <small class="text-muted float-end">@Model.Id</small>
+                </div>
+                <div class="card-body">
+                    <form class="needs-validation extra-validate" novalidate action="/users/edit" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input dir="auto" asp-for="Id" hidden />
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Full Name</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span id="basic-icon-default-company" class="input-group-text"><i class="bx bx-buildings"></i></span>
+                                    <input dir="auto" asp-for="FullName" type="text" id="basic-icon-default-company" class="form-control" placeholder="John Doe" aria-label="John Doe" aria-describedby="basic-icon-default-company2">
+                                </div>
+                                <div class="form-text">Write user's full name</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Username</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span id="basic-icon-default-fullname2" class="input-group-text"><i class="bx bx-user"></i></span>
+                                    <input dir="auto" asp-for="UserName" type="text" class="form-control" id="basic-icon-default-fullname" placeholder="JohnDoe" aria-label="JohnDoe" aria-describedby="basic-icon-default-fullname2">
+                                </div>
+                                <div class="form-text">Write user's username</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Email</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class="bx bx-envelope"></i></span>
+                                    <input dir="auto" type="email" id="basic-icon-default-email" asp-for="Email" class="form-control" placeholder="john.doe" aria-label="john.doe" aria-describedby="basic-icon-default-email2">
+                                    <span id="basic-icon-default-email2" class="input-group-text">@@example.com</span>
+                                </div>
+                                <div class="form-text">Write user E-Mail</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 form-label" for="basic-icon-default-message">Roles</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span id="basic-icon-default-message2" class="input-group-text"><i class="bx bx-bookmark"></i></span>
+                                    <select class="form-select mb-3" id="multiple-select-field" asp-for="Roles"
+                                            data-placeholder="--Select Roles--" multiple required>
+                                        @foreach (var item in Html.GetEnumSelectList<UserType>())
+                                        {
+                                            @if (Model.Roles.Any(e => e == item.Text))
+                                            {
+                                                <option value="@item.Text" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Text">@item.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-text">Choose what user can do</div>
+                            </div>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="row mb-3">
+                                <label class="col-sm-2 form-label" for="basic-icon-default-message"></label>
+                                <div class="col-sm-10">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <ul class="mb-0">
+                                                <li>@error.ErrorMessage</li>
+                                            </ul>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <!-- Basic with Icons -->
+        <div class="col-xxl">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Change Password</h5>
+                    <small class="text-muted float-end">user's password</small>
+                </div>
+                <div class="card-body">
+                    <form class="needs-validation extra-validate" action="/users/changepassword" novalidate id="password-form" method="post">
+                        <input dir="auto" asp-for="Id" id="other-id" hidden />
+                        <input dir="auto" asp-for="FullName" hidden>
+                        <input dir="auto" asp-for="UserName" hidden>
+                        <input dir="auto" asp-for="Email" hidden>
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="row mb-3 form-password-toggle">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Password</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <input dir="auto" type="password"
+                                           id="password"
+                                           class="form-control"
+                                           name="password"
+                                           placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                           aria-describedby="password" required />
+                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                </div>
+                                <div class="form-text">Write a secure password</div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-2 form-label" for="basic-icon-default-message"></label>
+                            <div class="col-sm-10">
+                                <div class="form-check">
+                                    <input dir="auto" class="form-check-input" name="logoutUsers" type="checkbox" id="remember-me" />
+                                    <label class="form-check-label" for="remember-me"> Logout users with this account </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-end">
+                            <div class="col-sm-10">
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Id != User.GetUserId())
+    {
+        <div class="row">
+            <!-- Basic with Icons -->
+            <div class="col-xxl">
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">Delete user</h5>
+                        <small class="text-muted float-end">Delete</small>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <p><strong>Alert</strong>: Once you delete this item, it will be flagged as deleted.</p>
+                            <a name="delete" route="users" id="@Model.Id" class="btn btn-danger text-white mt-2">
+                                Delete User
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(() => {
+            $('#user-mbtn').addClass('active');
+
+            $(document).on('click', 'a[name="delete"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post(`/users/delete/${$(this).attr("id")}`)
+                            .fail(xhr => {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                    icon: "error"
+                                });
+                            })
+                            .done(() => {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "Deleted Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            })
+                    }
+                });
+            });
+        })
+    </script>
+}

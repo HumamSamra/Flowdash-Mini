@@ -1,0 +1,327 @@
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.Extensions
+@using Flowdash_Mini.ViewModels.Projects
+@using Microsoft.Extensions.Options
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+@model List<ProjectVM>
+@inject IOptions<CaptchaOptions> captcha
+
+
+<div class="row mb-3">
+    <div class="col-lg-12 mb-4 order-0">
+        <div class="card">
+            <div class="d-flex align-items-end row">
+                <div class="col-sm-7">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Welcome Back @User.GetUserName()! 🎉</h5>
+                        <p class="mb-4">
+                            You can <span class="fw-bold">control</span> and <span class="fw-bold">navigate</span> your website totally from the dashboard panel.
+                        </p>
+
+                        <a href="/admin/appsettings" class="btn btn-sm btn-outline-secondary d-flex gap-1 align-items-center justify-content-center"
+                           style="width: fit-content !important">
+                            <i class="bx bx-x"></i>
+                            <span>Don't show this message again</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-sm-5 text-center text-sm-left">
+                    <div class="card-body pb-0 px-0 px-md-4">
+                        <img src="~/admin/assets/img/illustrations/man-with-laptop-light.png"
+                             height="140"
+                             alt="View Badge User"
+                             data-app-dark-img="illustrations/man-with-laptop-dark.png"
+                             data-app-light-img="illustrations/man-with-laptop-light.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex flex-column">
+    <div class="mb-3 d-flex justify-content-between flex-wrap">
+        <h2 class="m-0">Current Projects</h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex gap-2 align-items-center justify-content-center"
+                    id="join-proj-btn">
+                <i class="bx bx-group"></i>
+                <span>Join Project</span>
+            </button>
+            <a class="btn btn-primary d-flex gap-2 align-items-center justify-content-center" href="/createproject">
+                <i class="bx bx-plus"></i>
+                <span>Create New Project</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        @if (Model.Count > 0)
+        {
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var item = Model[i];
+
+                <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                            <div class="card-title mb-0">
+                                <h5 class="m-0 me-2">
+                                    <a class="select-project-btn" id="@item.Id" href="javascript:void(0);">
+                                        @item.ProjectName
+                                    </a>
+                                </h5>
+                                <div class="d-flex gap-2 mt-2 align-items-center">
+                                    @if (item.Members.First(e => e.Member.Id == User.GetUserId()).MemberType == MemberType.Owner)
+                                    {
+                                        <span class="badge bg-label-warning text-warning">Owner</span>
+                                    }
+                                    else if (item.Members.First(e => e.Member.Id == User.GetUserId()).MemberType == MemberType.Admin)
+                                    {
+                                        <span class="badge bg-label-success text-success">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-label-primary text-primary">User</span>
+
+                                    }
+                                    <button class="clean-btn d-flex gap-1 align-items-center text-muted"
+                                            onclick="copyText('#project-code-@item.Id')">
+                                        <small id="project-code-@item.Id">@item.ProjectCode</small>
+                                        <i class="bx bx-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn p-0" type="button" id="orederStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
+                                    <a class="dropdown-item d-flex gap-2 align-items-center" href="/projects/edit/@item.Id">
+                                        <i class="bx bx-edit"></i>
+                                        <span>Edit Project</span>
+                                    </a>
+                                    <a class="dropdown-item d-flex gap-2 align-items-center" href="/projects/members/@item.Id">
+                                        <i class="bx bx-group"></i>
+                                        <span>Members</span>
+                                    </a>
+                                    <a class="dropdown-item d-flex gap-2 align-items-center" href="/projects/settings/@item.Id">
+                                        <i class="bx bx-cog"></i>
+                                        <span>Manage</span>
+                                    </a>
+                                    <a class="dropdown-item text-danger d-flex gap-2 align-items-center"
+                                       href="javascript:void(0);">
+                                        <i class='bx  bx-arrow-out-right-stroke-circle-half'></i>
+                                        <span>Leave Project</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex my-3 px-0 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <span class="badge bg-label-info p-2"><i class="bx bx-calendar-alt text-info"></i></span>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <small>Joined At</small>
+                                        <h6 class="mb-0">@item.Members.First(e => e.Member.Id == User.GetUserId()).JoinedAt.ToString("dd MMM, yyyy")</h6>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <span class="badge bg-label-primary p-2"><i class="bx bx-group text-primary"></i></span>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <small>Members</small>
+                                        <h6 class="mb-0">Current Members @item.Members.Count / @item.MaxMembersLimit</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (item.Tags.Split(",").Count() > 0)
+                            {
+                                <div class="d-flex gap-2 flex-wrap mb-3 mt-2">
+                                    @foreach (var tag in item.Tags.Split(","))
+                                    {
+                                        <span class="badge bg-label-dark text-secondary">@tag</span>
+                                    }
+                                </div>
+                            }
+                            <ul class="p-0 m-0">
+                                <li class="d-flex">
+                                    @if (item.State == ProjectState.Public)
+                                    {
+                                        <div class="avatar flex-shrink-0 me-3">
+                                            <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-lock-open"></i></span>
+                                        </div>
+                                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Status</h6>
+                                                <small class="text-muted">Public (Open for everyone)</small>
+                                            </div>
+                                            <div class="user-progress">
+                                                <small class="fw-semibold">(PUBLIC)</small>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (item.State == ProjectState.Private)
+                                    {
+                                        <div class="avatar flex-shrink-0 me-3">
+                                            <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-lock"></i></span>
+                                        </div>
+                                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Status</h6>
+                                                <small class="text-muted">Private (Can join with link only)</small>
+                                            </div>
+                                            <div class="user-progress">
+                                                <small class="fw-semibold">(PRIVATE)</small>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="avatar flex-shrink-0 me-3">
+                                            <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-lock"></i></span>
+                                        </div>
+                                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                            <div class="me-2">
+                                                <h6 class="mb-0">Status</h6>
+                                                <small class="text-muted">Personal (Nobody can join)</small>
+                                            </div>
+                                            <div class="user-progress">
+                                                <small class="fw-semibold">(PUBLIC)</small>
+                                            </div>
+                                        </div>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <span class="text-muted">You haven't joined or created any projects yet</span>
+        }
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="https://www.google.com/recaptcha/api.js?hl=en&render=@captcha.Value.SiteKey" async defer></script>
+    <script>
+        $('#home-mbtn').addClass('active')
+
+        $('.select-project-btn').on('click', async function () {
+            const projId = $(this).attr('id');
+
+            try {
+                const captchaToken = await new Promise((resolve) => {
+                    grecaptcha.ready(function () {
+                        grecaptcha.execute('@captcha.Value.SiteKey', { action: 'JOIN_PROJECT' })
+                            .then(function (token) { resolve(token); });
+                    });
+                });
+
+                const response = await $.ajax({
+                    url: `/selectproject/${projId}`,
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken':
+                            $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    data: {
+                        id: projId,
+                        'g-recaptcha-response': captchaToken,
+                    }
+                });
+
+                if (response.statusCode && response.statusCode !== 200) {
+                     throw new Error(response.msg || "Server returned an error");
+                }
+                window.location.href = "/project";
+
+            } catch (error) {
+                let msg = error.message;
+                if (!msg && error.responseJSON) msg = error.responseJSON.msg;
+                if (!msg) msg = "Failed to select project";
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: msg,
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        });
+
+        $('#join-proj-btn').on('click', function () {
+            Swal.fire({
+                title: "Join Project",
+                input: "text",
+                inputAttributes: {
+                    autocapitalize: "off",
+                    autocomplete: "off",
+                    placeholder: 'Enter Project Code...'
+                },
+                showCancelButton: true,
+                confirmButtonText: "Join or Send Invite",
+                showLoaderOnConfirm: true,
+                preConfirm: async (projCode) => {
+                    try {
+                        const captchaToken = await new Promise((resolve) => {
+                            grecaptcha.ready(function () {
+                                grecaptcha.execute('@captcha.Value.SiteKey', { action: 'JOIN_PROJECT' })
+                                    .then(function (token) { resolve(token); });
+                            });
+                        });
+
+                        const result = await $.ajax({
+                            url: `/joinproject`,
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken':
+                                    $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            data: {
+                                projCode: projCode,
+                                'g-recaptcha-response': captchaToken
+                            }
+                        });
+
+                        if (result.statusCode !== 200) {
+                            throw new Error(result.msg || "Unknown error occurred.");
+                        }
+
+                        return result;
+
+                    } catch (error) {
+                        const msg = error.message || error.responseText || error.statusText;
+                        Swal.showValidationMessage(msg);
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Hooray!",
+                        text: result.value.msg ?? "You are now part of the project!",
+                        icon: "success"
+                    }).then(() => {
+                        window.location.reload(true);
+                    });
+                }
+            });
+        });
+    </script>
+}

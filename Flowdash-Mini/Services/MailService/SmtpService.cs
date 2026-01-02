@@ -10,9 +10,11 @@ namespace Flowdash_Mini.Services.MailService
     public class SmtpService : ISmtpService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public SmtpService(IUnitOfWork unitOfWork)
+        private readonly IConfiguration _config;
+        public SmtpService(IUnitOfWork unitOfWork, IConfiguration config)
         {
             _unitOfWork = unitOfWork;
+            _config = config;
         }
 
         public SmtpResult SendMail(string subject, string body, List<string> to)
@@ -45,7 +47,41 @@ namespace Flowdash_Mini.Services.MailService
                 message.Subject = subject;
                 message.Body = new TextPart("html")
                 {
-                    Text = body,
+                    Text = $@"
+                            <!DOCTYPE html>
+                            <html>
+                            <body style='font-family: Roboto,Raleway,Arial,Helvetica,sans-serif; background:#f5f5f5; padding:20px;'>
+                              <div style='max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:8px;'>
+    
+                                <div style='text-align:center;'>
+                                  <img src='https://{_config["WebDomain"]}/images/logo.png'
+                                       alt='Flowdash'
+                                       style='width:120px; margin-bottom:10px;' />
+                                  <h1 style='margin:0; color:#333;'>Flowdash</h1>
+                                </div>
+
+                                <hr style='margin:20px 0;' />
+                                {body}
+                                <hr style='margin:20px 0;' />
+                                <table width='100%' cellpadding='0' cellspacing='0' style='font-family: Roboto,Raleway,Arial,Helvetica,sans-serif;'>
+                                  <tr>
+                                    <td align='left' style='color:#555; font-size:14px;'>
+                                      Flowdash Team
+                                    </td>
+                                    <td align='right' style='font-size:14px;'>
+                                      <a href='{_config["WebDomain"]}'
+                                         style='color:#4f46e5; text-decoration:none;'>
+                                        Home
+                                      </a>
+                                    </td>
+                                  </tr>
+                                </table>
+                                <div style='text-align:center;color:#a5a5a5;'>
+                                <span style='color:#a5a5a5;'>Flowdash - All rights are reserved © 2025</span>
+                                </div>
+                              </div>
+                            </body>
+                            </html>",
                 };
 
                 using (var client = new SmtpClient())

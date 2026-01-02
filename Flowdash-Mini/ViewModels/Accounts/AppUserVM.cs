@@ -16,6 +16,9 @@ namespace Flowdash_Mini.ViewModels.Accounts
         [Required]
         public string Email { get; set; } = string.Empty;
 
+        public bool EmailConfirmed { get; set; }
+        public bool IsLockedout { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime ModifiedAt { get; set; }
 
@@ -25,8 +28,7 @@ namespace Flowdash_Mini.ViewModels.Accounts
         [Required]
         public string ModifiedBy { get; set; } = string.Empty;
 
-        public IList<string> Roles { get; set; } = new List<string>()
-        {
+        public IList<string> Roles { get; set; } = new List<string> {
             nameof(UserType.User)
         };
     }
