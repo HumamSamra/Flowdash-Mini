@@ -61,6 +61,11 @@ namespace Flowdash_Mini.Controllers
 
         public IActionResult Members()
         {
+            if (ViewBag.MemberType == MemberType.User)
+            {
+                return Redirect("/project");
+            }
+
             var code = CookieHandler.Get(CookieName, HttpContext)!;
 
             var project = _unitOfWork.Projects.GetByCode(code);

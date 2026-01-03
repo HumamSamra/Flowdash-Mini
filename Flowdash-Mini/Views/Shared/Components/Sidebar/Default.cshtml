@@ -53,50 +53,63 @@
             </li>
         }
 
-        @if (mt != null)
+        @if (ViewBag.MemberType != null)
         {
-            if (mt == MemberType.Owner || mt == MemberType.Admin)
+            <li class="menu-item" id="members-mbtn">
+                <a href="/project/members"
+                   class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-community"></i>
+                    <div data-i18n="Documentation">Members</div>
+                </a>
+            </li>
+
+            <li class="menu-item" id="progress-mbtn">
+                <a href="/project/progress"
+                   class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-circle-dashed-half"></i>
+                    <div>Progress</div>
+                </a>
+            </li>
+
+            if (ViewBag.MemberType == MemberType.Owner || ViewBag.MemberType == MemberType.Admin)
             {
-                <li class="menu-item" id="members-mbtn">
-                    <a href="/project/members"
+                <!-- Forms & Tables -->
+                <li class="menu-header small text-uppercase"><span class="menu-header-text">Settings</span></li>
+                <!-- Forms -->
+                <li class="menu-item" id="manage-mbtn">
+                    <a href="/project/manage"
                        class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-community"></i>
-                        <div data-i18n="Documentation">Members</div>
+                        <i class="menu-icon tf-icons bx bx-cog"></i>
+                        <div data-i18n="Documentation">Manage</div>
                     </a>
                 </li>
             }
         }
 
-        <!-- Forms & Tables -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Settings</span></li>
-        <!-- Forms -->
-        <li class="menu-item" id="manage-mbtn">
-            <a href="/project/manage"
-               class="menu-link">
-                <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div data-i18n="Documentation">Manage</div>
-            </a>
-        </li>
-        @* <li class="menu-item" id="settings-mbtn">
-            <a href="/appsettings"
-               class="menu-link">
-                <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div data-i18n="Documentation">Settings</div>
-            </a>
-        </li> *@
-        <li class="menu-item" id="settings2-mbtn">
-            <a href="/appsettings/socials"
-               class="menu-link">
-                <i class="menu-icon tf-icons bx bx-cube-alt"></i>
-                <div data-i18n="Documentation">Socials</div>
-            </a>
-        </li>
-        <li class="menu-item" id="settings3-mbtn">
-            <a href="/appsettings/smtp"
-               class="menu-link">
-                <i class="menu-icon tf-icons bx bx-envelope"></i>
-                <div data-i18n="Documentation">Mail Service</div>
-            </a>
-        </li>
+        @if (User.IsInRole(nameof(UserType.Admin)))
+        {
+            <li class="menu-header small text-uppercase"><span class="menu-header-text">Admin Settings</span></li>
+            <li class="menu-item" id="settings-mbtn">
+                <a href="/appsettings"
+                   class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-toggles"></i>
+                    <div>Settings</div>
+                </a>
+            </li>
+            <li class="menu-item" id="settings2-mbtn">
+                <a href="/appsettings/socials"
+                   class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-cube-alt"></i>
+                    <div>Socials</div>
+                </a>
+            </li>
+            <li class="menu-item" id="settings3-mbtn">
+                <a href="/appsettings/smtp"
+                   class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-envelope"></i>
+                    <div>Mail Service</div>
+                </a>
+            </li>
+        }
     </ul>
 </aside>

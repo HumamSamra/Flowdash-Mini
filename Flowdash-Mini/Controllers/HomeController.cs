@@ -157,30 +157,19 @@ namespace Flowdash_Mini.Controllers
             return View(_mapper.Map<List<ProjectVM>>(projects));
         }
 
-        [HttpPost("/SelectProject/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<JsonResult> SelectProject(string id)
+        [HttpGet("/SetProject/{id}")]
+        public IActionResult SetProject(string id, string returnUrl = "/project")
         {
-            var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
-            if (!await _captcha.VerifyAsync(reCaptchaToken))
-            {
-                return Json(new { statusCode = 400, msg = "Invalid reCaptcha token" });
-            }
-
             var project = _unitOfWork.Projects.GetById(new Guid(id));
-            if (project == null)
+            if (project == null || !project.Members.Any(
+                e => e.MemberId == User.GetUserId()))
             {
-                return Json(new { statusCode = 400, msg = "Project not found" });
-            }
-
-            if (!project.Members.Any(e => e.MemberId == User.GetUserId()))
-            {
-                return Json(new { statusCode = 400, msg = "You are not a member of this project" });
+                return NotFound();
             }
 
             CookieHandler.Set(CookieName, HttpContext, project.ProjectCode);
 
-            return Json(new { statusCode = 200 });
+            return Redirect(returnUrl);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
