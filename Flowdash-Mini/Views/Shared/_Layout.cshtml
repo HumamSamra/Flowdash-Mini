@@ -65,6 +65,7 @@
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="~/admin/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="~/admin/assets/js/config.js"></script>
 </head>
 <body>
@@ -114,16 +115,12 @@
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
-    <script src="~/admin/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="~/admin/assets/vendor/libs/popper/popper.js"></script>
     <script src="~/admin/assets/vendor/js/bootstrap.js"></script>
     <script src="~/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
 
     <script src="~/admin/assets/vendor/js/menu.js"></script>
     <!-- endbuild -->
-    <!--TinyMCE-->
-    <script src="https://cdn.tiny.cloud/1/ryuqk5q3smzcw4os28zzlnjpkbpdip7eo6ieu6zem156lmzq/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
-
     <!--Data Tables-->
     <script src="~/lib/datatable-bs5/dataTables.js"></script>
     <script src="~/lib/datatable-bs5/dataTables.bootstrap5.js"></script>
@@ -149,5 +146,6 @@
     <script src="~/js/admin.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

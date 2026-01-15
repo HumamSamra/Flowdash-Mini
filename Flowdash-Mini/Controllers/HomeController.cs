@@ -6,6 +6,7 @@ using Flowdash_Mini.Models;
 using Flowdash_Mini.Models.Projects;
 using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
+using Flowdash_Mini.ViewModels.Accounts;
 using Flowdash_Mini.ViewModels.Projects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,8 +42,32 @@ namespace Flowdash_Mini.Controllers
             }
             else
             {
+                var proj = _unitOfWork.Projects.GetByCode(cookie);
+                if (proj == null || !proj.Members.Any(e => e.MemberId == User.GetUserId()))
+                {
+                    CookieHandler.Delete(CookieName, HttpContext);
+                    return Redirect("/selectproject");
+                }
                 return Redirect("/project");
             }
+        }
+
+        [HttpGet("/Notifications")]
+        public IActionResult Notifications()
+        {
+            return View();
+        }
+
+        [HttpGet("/MyAccount")]
+        public IActionResult MyAccount()
+        {
+            return View();
+        }
+
+        [HttpPost("/MyAccount")]
+        public IActionResult MyAccount(EditUserVM model)
+        {
+            return View();
         }
 
         [HttpGet("/createproject")]
@@ -145,6 +170,7 @@ namespace Flowdash_Mini.Controllers
 
             var projects = _unitOfWork.Projects.GetAll()
                 .Include(e => e.Members)
+                .ThenInclude(e => e.Member)
                 .Where(e => e.Members.Any(e => e.MemberId == User.GetUserId()))
                 .ToList();
 

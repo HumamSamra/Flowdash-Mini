@@ -1,6 +1,6 @@
 ﻿using Flowdash_Mini.Classes;
 using Flowdash_Mini.Enums;
-using Flowdash_Mini.Models.Projects;
+using Flowdash_Mini.ViewModels.Members;
 using System.ComponentModel.DataAnnotations;
 
 namespace Flowdash_Mini.ViewModels.Projects

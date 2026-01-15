@@ -1,0 +1,111 @@
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.ViewModels.Members
+@using Microsoft.Extensions.Options
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Edit Member";
+
+    List<ProjectMemberVM> members = ViewBag.Members;
+}
+@inject IOptions<CaptchaOptions> captcha
+@model EditProjectMemberVM
+
+<div class="fs-20 mb-3">
+    <a class="d-flex gap-2 align-items-center" href="/project/members">
+        <i class='bxr  bx-arrow-in-left-circle-half'></i>
+        <span>Back to list</span>
+    </a>
+</div>
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Manage Member - @Model.FullName</h5>
+        <small class="text-muted float-end">@DateTime.Now.ToString("dd MMM, yyyy")</small>
+    </div>
+    <div class="card-body">
+        <form class="extra-validate" novalidate autocomplete="off" id="reCaptcha-form"
+              method="POST" asp-controller="Project" asp-action="EditMember">
+
+            <input asp-for="Id" hidden />
+            <input name="g-recaptcha-response" hidden />
+
+            @Html.AntiForgeryToken()
+
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label" for="basic-default-code">Full Name (Original)</label>
+                <div class="col-sm-10">
+                    <div class="position-relative">
+                        <input type="text" class="form-control" id="basic-default-code"
+                               asp-for="FullName" readonly>
+                        <button onclick="copy('@Model.FullName')" class="text-white btn p-2 btn-secondary d-flex justify-content-center align-items-center position-absolute cstm-copybn" type="button">
+                            <i class="bx bx-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label" for="basic-default-state">User Type</label>
+                <div class="col-sm-10">
+                    <select class="form-select" asp-for="MemberType" id="basic-default-state" required>
+                        <option value="@MemberType.Owner" disabled>Owner (Ownership of the Project)</option>
+                        <option value="@MemberType.Admin">Admin (Admin Level Priviliges)</option>
+                        <option value="@MemberType.User">User (Normal Priviliges)</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <ul class="mb-0">
+                            <li>@error.ErrorMessage</li>
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            }
+
+            <div class="row justify-content-end">
+                <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary">Save & Apply Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://www.google.com/recaptcha/api.js?hl=en&render=@captcha.Value.SiteKey" async defer></script>
+    <script>
+        $(function () {
+            // Begin Script
+            $('#manage-mbtn').addClass('active')
+
+            let captchaDone = false;
+            $("#reCaptcha-form").on('submit', function (e) {
+                if (captchaDone) return;
+
+                e.preventDefault();
+
+                const form = this;
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                grecaptcha.ready(function () {
+                    grecaptcha.execute('@captcha.Value.SiteKey', { action: 'RESET_PASSWORD' })
+                        .then(function (token) {
+                            form.querySelector('input[name="g-recaptcha-response"]').value = token;
+                            captchaDone = true;
+                            form.submit();
+                        });
+                });
+            });
+            // End Script
+        });
+    </script>
+}

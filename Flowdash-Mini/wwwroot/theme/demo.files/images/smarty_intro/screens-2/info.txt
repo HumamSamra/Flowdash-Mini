@@ -1,1 +1,0 @@
-screen original width: 1220px

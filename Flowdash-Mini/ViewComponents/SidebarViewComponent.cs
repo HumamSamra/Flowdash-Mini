@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Flowdash_Mini.Classes;
 using Flowdash_Mini.Repositories;
+using Flowdash_Mini.ViewModels.Views;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Flowdash_Mini.ViewComponents
@@ -16,7 +18,19 @@ namespace Flowdash_Mini.ViewComponents
 
         public IViewComponentResult Invoke()
         {
-            return View();
+            var code = CookieHandler.Get("MEMORY_PROJECT_CODE", HttpContext);
+            var model = new SidebarVM()
+            {
+                ProjectCode = code ?? "",
+            };
+
+            var announcements = _unitOfWork.Announcements.GetAllByProjectCode(code ?? "");
+            if (announcements.Count > 0)
+            {
+                model.LastAnnouncementId = announcements.OrderByDescending(
+                    e => e.CreatedAt).First().Id.ToString();
+            }
+            return View(model);
         }
     }
 }

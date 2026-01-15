@@ -58,15 +58,6 @@
         placeholder: $(this).data('placeholder'),
         closeOnSelect: false,
     });
-
-
-    tinymce.init({
-        selector: 'textarea.tinymce',
-        height: 300,
-        plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons accordion',
-        menubar: 'file edit view insert format tools table help',
-        toolbar: "undo redo | blocks fontfamily fontsize | accordion accordionremove | bold italic underline strikethrough | align numlist bullist | link image | table media | lineheight outdent indent| forecolor backcolor removeformat | charmap emoticons | code fullscreen preview | save print | pagebreak anchor codesample | ltr rtl",
-    });
 })()
 
 $(document).on('click', 'tr.clickable-redirect > td:not(.avoid-click)', function (ev) {
@@ -85,6 +76,28 @@ $('input.daterange-picker').daterangepicker({
 $('input.daterange-picker').on('cancel.daterangepicker', function (ev, picker) {
     $(this).val('');
 });
+
+function copy(value) {
+    if (!value) return;
+
+    navigator.clipboard.writeText(value);
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+    Toast.fire({
+        icon: "success",
+        title: "Text copied successfully"
+    });
+}
 
 function copyText(selector) {
     const text = document.querySelector(selector)?.innerText;

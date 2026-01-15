@@ -1,0 +1,78 @@
+﻿@using Flowdash_Mini.ViewModels.Accounts
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "My Account";
+}
+@model EditUserVM
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <h5 class="card-header">Profile Details</h5>
+            <!-- Account -->
+            <div class="card-body">
+                <form id="formAccountSettings" method="POST" class="extra-validate" novalidate autocomplete="off">
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label for="fullname" class="form-label">Full Name</label>
+                            <input class="form-control" type="text" id="fullname" asp-for="FullName" autofocus="" required>
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label for="username" class="form-label">Username</label>
+                            <input class="form-control" type="text" asp-for="UserName" id="username" autocapitalize="off" required>
+                        </div>
+                        <div class="mb-3 col-md-12">
+                            <label for="email" class="form-label">E-mail</label>
+                            <input class="form-control" type="text" id="email" asp-for="Email" required placeholder="john.doe@example.com">
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-primary me-2">Save changes</button>
+                            <button type="reset" class="btn btn-outline-secondary">Clear</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- /Account -->
+        </div>
+        <div class="card mb-4">
+            <h5 class="card-header">Password & Security</h5>
+            <!-- Account -->
+            <div class="card-body">
+                <form id="formAccountSettings2" method="POST" class="extra-validate" novalidate>
+                    <div class="row">
+                        <div class="mb-3 col-md-12">
+                            <label for="pwd" class="form-label">Password</label>
+                            <input class="form-control" type="password" id="pwd" name="password" required placeholder="Enter new Password">
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-primary me-2">Save changes</button>
+                            <button type="reset" class="btn btn-outline-secondary">Clear</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- /Account -->
+        </div>
+
+        <div class="card">
+            <h5 class="card-header">Delete Account</h5>
+            <div class="card-body">
+                <div class="mb-3 col-12 mb-0">
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading fw-bold mb-1">Are you sure you want to delete your account?</h6>
+                        <p class="mb-0">Once you delete your account, there is no going back. Please be certain.</p>
+                    </div>
+                </div>
+                <form id="formAccountDeactivation" novalidate class="extra-validate">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="accountActivation" id="accountActivation" required>
+                        <label class="form-check-label" for="accountActivation">I confirm my account deactivation</label>
+                    </div>
+                    <button type="submit" class="btn btn-danger deactivate-account">Deactivate Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

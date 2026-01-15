@@ -1,0 +1,235 @@
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.ViewModels.Announcements
+@using Microsoft.Extensions.Options
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Announcements";
+
+    var projectCode = ViewBag.ProjectCode;
+    var lastAnn = ViewBag.LastAnnouncementId;
+
+    int x = 1;
+}
+@inject IOptions<CaptchaOptions> captcha
+@model List<ProjectAnnouncementVM>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold py-3 mb-4"><a href="/project" class="text-muted fw-light">Project /</a> Members</h4>
+        <div class="d-flex gap-3 align-items-center justify-content-center">
+            @if (ViewBag.MemberType == MemberType.Owner ||
+                        ViewBag.MemberType == MemberType.Admin)
+            {
+                <a href="javascript:void(0);" id="create-announcemnet-btn" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                    <i class="bx bx-megaphone-alt"></i>
+                    <span>Post Announcement</span>
+                </a>
+            }
+            <a href="javascript:void(0);" class="refresh-btn btn btn-outline-secondary d-flex justify-content-center align-items-center gap-2">
+                <i class="bx bx-refresh-cw"></i> <span>Refresh</span>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <h5 class="card-header">View Members</h5>
+                <div class="card-body">
+                    <div class="table-responsive table-responsive text-nowrap">
+                        <table class="table table-bordered data-table-list">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        #
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Announcement</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Date & Time</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Posted By</h6>
+                                    </th>
+                                    @if (ViewBag.MemberType == MemberType.Owner ||
+                                                                        ViewBag.MemberType == MemberType.Admin)
+                                    {
+                                        <th>
+                                            <h6 class="m-0">Actions</h6>
+                                        </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="text-start"><h6 class="m-0">@(x++)</h6></td>
+                                        <td>
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <h6 class="m-0">@item.Text</h6>
+                                            </div>
+                                        </td>
+                                        <td><h6 class="m-0">@item.CreatedAt.ToString("dd MMM, yyyy hh:mm tt")</h6></td>
+                                        <td>
+                                            <h6 class="m-0">
+                                                @item.CreatedBy
+                                            </h6>
+                                        </td>
+                                        @if (ViewBag.MemberType == MemberType.Owner || ViewBag.MemberType == MemberType.Admin)
+                                        {
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item text-danger" name="delete" id="@item.Id" href="javascript:void(0)">
+                                                            <i class="bx bx-trash me-1"></i>
+                                                            Delete Announcement
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="https://www.google.com/recaptcha/api.js?hl=en&render=@captcha.Value.SiteKey" async defer></script>
+    <script>
+        $(function () {
+            $('#ann-mbtn').addClass('active')
+
+            $(function () {
+                var proj = '@projectCode';
+                var lastannid = '@lastAnn';
+
+                if (proj && lastannid) {
+                    localStorage.setItem('LAST_ANN_ID_' + proj, lastannid);
+                    $('#announcement-noti').addClass('d-none');
+                }
+            });
+
+            $('#create-announcemnet-btn').on('click', function () {
+                Swal.fire({
+                    title: "Post Announcement",
+                    input: "text",
+                    inputAttributes: {
+                        autocapitalize: "off",
+                        autocomplete: "off",
+                        placeholder: 'Enter Announcemnt Content...'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: "Post Announcement",
+                    showLoaderOnConfirm: true,
+                    preConfirm: async (text) => {
+                        try {
+                            const captchaToken = await new Promise((resolve) => {
+                                grecaptcha.ready(function () {
+                                    grecaptcha.execute('@captcha.Value.SiteKey', { action: 'JOIN_PROJECT' })
+                                        .then(function (token) { resolve(token); });
+                                });
+                            });
+
+                            const result = await $.ajax({
+                                url: `/project/createannouncemnet`,
+                                method: 'POST',
+                                headers: {
+                                    'RequestVerificationToken':
+                                        $('input[name="__RequestVerificationToken"]').val()
+                                },
+                                data: {
+                                    Text: text,
+                                    'g-recaptcha-response': captchaToken
+                                }
+                            });
+
+                            if (result.statusCode !== 200) {
+                                throw new Error(result.msg || "Unknown error occurred.");
+                            }
+
+                            return result;
+
+                        } catch (error) {
+                            const msg = error.message || error.responseText || error.statusText;
+                            Swal.showValidationMessage(msg);
+                        }
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    console.log(result)
+                    if (result.isConfirmed) {
+                        if (result.value.statusCode == 200) {
+                            Swal.fire({
+                                title: "Hooray!",
+                                text: result.value.msg ?? "Announcement was posted successfully!",
+                                icon: "success"
+                            }).then(() => {
+                                window.location.reload(true);
+                            });
+                        } else {
+                            Swal.fire({
+                                title: "Oops..",
+                                text: result.value.msg ?? "Unknown Error Occurred",
+                                icon: "error"
+                            })
+                        }
+                    }
+                })
+            });
+
+            $(document).on('click', 'a[name="delete"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You can't undo this action!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/project/deleteannouncement/' + $(this).attr('id'),
+                            method: 'post',
+                        }).fail(xhr => {
+                            Swal.fire({
+                                title: "Oops..",
+                                text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                icon: "error"
+                            });
+                        }).done((result) => {
+                            if(result.statusCode == 200) {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "Announcement Deleted Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: result.msg || "An error occurred...",
+                                    icon: "error"
+                                })
+                            }
+                        })
+                    }
+                });
+            });
+        })
+    </script>
+}

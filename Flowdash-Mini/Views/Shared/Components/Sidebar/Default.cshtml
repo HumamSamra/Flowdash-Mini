@@ -1,10 +1,13 @@
 ﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.ViewModels.Views
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
     MemberType? mt = ViewBag.MemberType;
 }
+@model SidebarVM
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="" class="app-brand-link">
@@ -33,7 +36,7 @@
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Security</span>
             </li>
-            <li class="menu-item" id="sidebar-users">
+            <li class="menu-item" id="user-mbtn">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-group"></i>
                     <div data-i18n="Account Settings">Website Users</div>
@@ -55,6 +58,30 @@
 
         @if (ViewBag.MemberType != null)
         {
+            <li class="menu-header small text-uppercase"><span class="menu-header-text">Important</span></li>
+            <li class="menu-item" id="ann-mbtn">
+                <a href="/project/announcements"
+                   class="menu-link position-relative">
+                    <i class='menu-icon tf-icons bx  bx-megaphone-alt'></i>
+                    <span id="announcement-noti" class="d-none ms-4 mt-2 position-absolute top-0 translate-middle p-1 bg-danger border border-light rounded-circle">
+                        <span class="visually-hidden">New alerts</span>
+                    </span>
+                    <div>Announcements</div>
+                </a>
+            </li>
+
+            @if (ViewBag.MemberType == MemberType.Owner)
+            {
+                <li class="menu-item" id="ann-mbtn">
+                    <a href="/project/requests"
+                       class="menu-link">
+                        <i class='menu-icon tf-icons bx bx-user-plus'></i>
+                        <div>Join Requests</div>
+                    </a>
+                </li>
+            }
+
+            <li class="menu-header small text-uppercase"><span class="menu-header-text">Project</span></li>
             <li class="menu-item" id="members-mbtn">
                 <a href="/project/members"
                    class="menu-link">
@@ -73,6 +100,16 @@
 
             if (ViewBag.MemberType == MemberType.Owner || ViewBag.MemberType == MemberType.Admin)
             {
+                <!-- Forms & Tables -->
+                <li class="menu-header small text-uppercase"><span class="menu-header-text">Actions</span></li>
+                <!-- Forms -->
+                <li class="menu-item" id="activity-mbtn">
+                    <a href="/project/activity"
+                       class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-pulse"></i>
+                        <div data-i18n="Documentation">Activity Log</div>
+                    </a>
+                </li>
                 <!-- Forms & Tables -->
                 <li class="menu-header small text-uppercase"><span class="menu-header-text">Settings</span></li>
                 <!-- Forms -->
@@ -113,3 +150,22 @@
         }
     </ul>
 </aside>
+
+<script defer>
+    $(document).ready(function (){
+        var proj = '@Model.ProjectCode';
+        var latestAnn = '@Model.LastAnnouncementId';
+
+        if (!proj || !latestAnn) return;
+
+        var storedAnn = localStorage.getItem('LAST_ANN_ID_' + proj);
+
+        if (storedAnn) {
+            if (storedAnn !== latestAnn) {
+                $('#announcement-noti').removeClass('d-none');
+            }
+        } else {
+            $('#announcement-noti').removeClass('d-none');
+        }
+    })
+</script>

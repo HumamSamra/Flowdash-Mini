@@ -1,5 +1,7 @@
 ﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.Extensions
 @using Flowdash_Mini.Models.Projects
+@using Flowdash_Mini.ViewModels.Members
 @using Flowdash_Mini.ViewModels.Projects
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -53,9 +55,12 @@
                                     <th>
                                         <h6 class="m-0">Member Type</h6>
                                     </th>
-                                    <th>
-                                        <h6 class="m-0">Actions</h6>
-                                    </th>
+                                    @if (ViewBag.MemberType == MemberType.Owner)
+                                    {
+                                        <th>
+                                            <h6 class="m-0">Actions</h6>
+                                        </th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -91,20 +96,34 @@
                                                     <span class="badge bg-label-primary text-primary">User</span>
                                                 }
                                             </td>
-                                            <td class="text-center">
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                                            data-bs-toggle="dropdown" aria-expanded="true">
-                                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="javascript:void(0))">
-                                                            <i class="bx bx-edit-alt me-1"></i>
-                                                            <span>Edit</span>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </td>
+                                            @if (ViewBag.MemberType == MemberType.Owner)
+                                            {
+                                                <td class="text-center">
+                                                    @if (item.Member?.Id != User.GetUserId())
+                                                    {
+                                                        <div class="dropdown">
+                                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                                                    data-bs-toggle="dropdown" aria-expanded="true">
+                                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu">
+                                                                <a class="dropdown-item" href="/project/editmember/@item.Id">
+                                                                    <i class="bx bx-edit me-1"></i>
+                                                                    <span>Edit Member</span>
+                                                                </a>
+                                                                <a class="dropdown-item text-danger" id="@item.Id" name="transfer-ownership" href="javascript:void(0))">
+                                                                    <i class='bx  bx-arrow-left-right me-1'></i>
+                                                                    <span>Transfer Ownership</span>
+                                                                </a>
+                                                                <a class="dropdown-item text-danger" id="@item.Id" name="remove-member" href="javascript:void(0))">
+                                                                    <i class="bx bx-trash me-1"></i>
+                                                                    <span>Remove Member</span>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </td>
+                                            }
                                         </tr>
                                     }
 
@@ -122,5 +141,83 @@
 @section Scripts {
     <script>
         $('#members-mbtn').addClass('active')
+
+        $(document).on('click', 'a[name="remove-member"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This member will be removed from the project",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, remove it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/project/removemember/' + $(this).attr('id'),
+                            method: 'post',
+                        }).fail(xhr => {
+                            Swal.fire({
+                                title: "Oops..",
+                                text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                icon: "error"
+                            });
+                        }).done((result) => {
+                            if(result.statusCode == 200) {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "Member Removed Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: result.msg || "An error occurred...",
+                                    icon: "error"
+                                })
+                            }
+                        })
+                    }
+                });
+            });
+
+            $(document).on('click', 'a[name="transfer-ownership"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This is a dangerous area!\nYou can't undo this action!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, transfer ownership!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/project/transferownership/' + $(this).attr('id'),
+                            method: 'post',
+                        }).fail(xhr => {
+                            Swal.fire({
+                                title: "Oops..",
+                                text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                icon: "error"
+                            });
+                        }).done((result) => {
+                            if(result.statusCode == 200) {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "Ownership Transferred Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: result.msg || "An error occurred...",
+                                    icon: "error"
+                                })
+                            }
+                        })
+                    }
+                });
+            });
     </script>
 }

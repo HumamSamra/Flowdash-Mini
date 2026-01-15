@@ -12,6 +12,8 @@ namespace Flowdash_Mini.Models.Accounts
         public DateTime LastEmailVerificationSent { get; set; }
 
         public ICollection<ProjectMember> Projects { get; set; } = new List<ProjectMember>();
+        public ICollection<ProjectJoinRequest> JoinRequests { get; set; } = new List<ProjectJoinRequest>();
+        public ICollection<ProjectInvite> ProjectInvites { get; set; } = new List<ProjectInvite>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;

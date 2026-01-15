@@ -151,6 +151,30 @@ namespace Flowdash_Mini.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Flowdash_Mini.Models.Accounts.ProjectInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ProjectInvites");
+                });
+
             modelBuilder.Entity("Flowdash_Mini.Models.AppSettings.AppSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -289,6 +313,81 @@ namespace Flowdash_Mini.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectAnnouncement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectAnnouncements");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectJoinRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ProjectJoinRequests");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectLogs");
+                });
+
             modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectMember", b =>
                 {
                     b.Property<Guid>("Id")
@@ -314,6 +413,77 @@ namespace Flowdash_Mini.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectMembers");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.TaskBoards.AppTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TaskBoardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskBoardId");
+
+                    b.ToTable("AppTasks");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.TaskBoards.AppTaskBoard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppTaskBoards");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -419,6 +589,66 @@ namespace Flowdash_Mini.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Flowdash_Mini.Models.Accounts.ProjectInvite", b =>
+                {
+                    b.HasOne("Flowdash_Mini.Models.Projects.Project", "Project")
+                        .WithMany("ProjectInvites")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Flowdash_Mini.Models.Accounts.AppUser", "User")
+                        .WithMany("ProjectInvites")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectAnnouncement", b =>
+                {
+                    b.HasOne("Flowdash_Mini.Models.Projects.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectJoinRequest", b =>
+                {
+                    b.HasOne("Flowdash_Mini.Models.Projects.Project", "Project")
+                        .WithMany("JoinRequests")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Flowdash_Mini.Models.Accounts.AppUser", "User")
+                        .WithMany("JoinRequests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectLog", b =>
+                {
+                    b.HasOne("Flowdash_Mini.Models.Projects.Project", "Project")
+                        .WithMany("ProjectLogs")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("Flowdash_Mini.Models.Projects.ProjectMember", b =>
                 {
                     b.HasOne("Flowdash_Mini.Models.Accounts.AppUser", "Member")
@@ -436,6 +666,17 @@ namespace Flowdash_Mini.Migrations
                     b.Navigation("Member");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.TaskBoards.AppTask", b =>
+                {
+                    b.HasOne("Flowdash_Mini.Models.TaskBoards.AppTaskBoard", "TaskBoard")
+                        .WithMany("Tasks")
+                        .HasForeignKey("TaskBoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaskBoard");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -491,12 +732,27 @@ namespace Flowdash_Mini.Migrations
 
             modelBuilder.Entity("Flowdash_Mini.Models.Accounts.AppUser", b =>
                 {
+                    b.Navigation("JoinRequests");
+
+                    b.Navigation("ProjectInvites");
+
                     b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("Flowdash_Mini.Models.Projects.Project", b =>
                 {
+                    b.Navigation("JoinRequests");
+
                     b.Navigation("Members");
+
+                    b.Navigation("ProjectInvites");
+
+                    b.Navigation("ProjectLogs");
+                });
+
+            modelBuilder.Entity("Flowdash_Mini.Models.TaskBoards.AppTaskBoard", b =>
+                {
+                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }

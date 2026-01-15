@@ -18,6 +18,33 @@
     z-index: 2000 !important
 }
 
+.note-editor .dropdown-toggle::after {
+    all: unset;
+}
+
+.note-editor .note-dropdown-menu {
+    box-sizing: content-box;
+}
+
+.note-editor .note-modal-footer {
+    box-sizing: content-box;
+}
+
+.clean-btn {
+    outline: none !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    background: none !important;
+}
+
+.cstm-copybn {
+    right: 5px !important;
+    top: 50% !important;
+    font-size: 10px !important;
+    transform: translate(0, -50%) !important;
+}
+
 .clickable-redirect {
     cursor: pointer !important
 }
@@ -80,6 +107,14 @@ select {
     border: none !important;
     background: none !important;
     padding: 0 !important;
+}
+
+.handle {
+    cursor: grab !important
+}
+
+.fs-20 {
+    font-size: 20px !important
 }
 
 /* CHOICES - JS */
@@ -475,3 +510,20 @@ select {
     opacity: 0.5;
 }
 /* END - CHOICES - JS */
+.bg-hover-light:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.text-overflow-ellipses {
+    text-overflow: ellipsis !important
+}
+
+.notifications-dropdown {
+    width: 400px;
+}
+
+@media (max-width: 475px) {
+    .notifications-dropdown {
+        width: 300px;
+    }
+}
