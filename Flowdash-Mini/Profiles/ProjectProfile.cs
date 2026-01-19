@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Flowdash_Mini.Models.Projects;
+using Flowdash_Mini.ViewModels.Activities;
 using Flowdash_Mini.ViewModels.Announcements;
 using Flowdash_Mini.ViewModels.Members;
 using Flowdash_Mini.ViewModels.Projects;
@@ -22,6 +23,8 @@ namespace Flowdash_Mini.Profiles
                 .ReverseMap();
 
             CreateMap<ProjectAnnouncement, ProjectAnnouncementVM>().ReverseMap();
+
+            CreateMap<ProjectLog, ProjectLogVM>().ReverseMap();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Flowdash_Mini.Models.Projects;
+using System.ComponentModel.DataAnnotations;
 
 namespace Flowdash_Mini.Models.TaskBoards
 {
@@ -11,6 +12,9 @@ namespace Flowdash_Mini.Models.TaskBoards
         public string Description { get; set; } = string.Empty;
 
         public List<AppTask> Tasks { get; set; } = new List<AppTask>();
+
+        public Project Project { get; set; } = null!;
+        public Guid ProjectId { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string CreatedBy { get; set; } = string.Empty;

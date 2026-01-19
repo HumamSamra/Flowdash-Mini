@@ -83,7 +83,7 @@ namespace Flowdash_Mini.Controllers
             var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
             if (!await _captcha.VerifyAsync(reCaptchaToken))
             {
-                ModelState.AddModelError("", "Invalid reCaptcha token");
+                ModelState.AddModelError(string.Empty, "Invalid reCaptcha token");
                 return View(model);
             }
 

@@ -1,6 +1,7 @@
 ﻿using Flowdash_Mini.Classes;
 using Flowdash_Mini.Enums;
 using Flowdash_Mini.Models.Accounts;
+using Flowdash_Mini.Models.TaskBoards;
 using System.ComponentModel.DataAnnotations;
 
 namespace Flowdash_Mini.Models.Projects
@@ -32,6 +33,7 @@ namespace Flowdash_Mini.Models.Projects
         public ICollection<ProjectJoinRequest> JoinRequests { get; set; } = new List<ProjectJoinRequest>();
         public ICollection<ProjectInvite> ProjectInvites { get; set; } = new List<ProjectInvite>();
         public ICollection<ProjectLog> ProjectLogs { get; set; } = new List<ProjectLog>();
+        public ICollection<AppTaskBoard> TaskBoards { get; set; } = new List<AppTaskBoard>();
 
         public string CreatedBy { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

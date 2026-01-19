@@ -1,10 +1,87 @@
 ﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.ViewModels.TaskBoards
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
     ViewData["Title"] = "Progress";
 }
+@model List<TaskBoardVM>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form class="modal-content ajax-form extra-validate" novalidate method="post" action="/project/createtaskboard">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title" id="exampleModalLabel1">Create new Task Board</h5>
+                <button class="clean-btn fs-20"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="bx bx-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label">Board Title</label>
+                        <input type="text" name="Title" id="nameBasic" class="form-control" required placeholder="Enter Title" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label">Board Description</label>
+                        <textarea class="form-control" name="Description" placeholder="Enter Description"></textarea>
+                    </div>
+                </div>
+                <div class="error-area">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form class="modal-content send-data ajax-form extra-validate" novalidate method="post" action="/project/edittaskboard">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title" id="exampleModalLabel1">Edit Task Board</h5>
+                <button class="clean-btn fs-20"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="bx bx-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input name="Id" hidden />
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label">Board Title</label>
+                        <input type="text" id="nameBasic" class="form-control" name="Title" placeholder="Enter Title" required />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label">Board Description</label>
+                        <textarea class="form-control" name="Description" placeholder="Enter Description"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="flex-grow-1">
     <div class="d-flex justify-content-between align-items-center">
@@ -12,7 +89,7 @@
         <div class="d-flex gap-3 align-items-center justify-content-center">
             @if (ViewBag.MemberType != MemberType.User)
             {
-                <a href="javascript:void(0);" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                <a href="javascript:void(0);" id="create-task" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
                     <i class="bx bx-plus"></i> <span>Create Task Board</span>
                 </a>
             }
@@ -24,44 +101,66 @@
     <div class="row">
         <div class="col-lg-12 col-md-12 order-1">
             <div class="row">
-                <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header mb-3 d-flex align-items-center justify-content-between pb-0">
-                            <div class="card-title mb-0">
-                                <h5 class="m-0 me-2">Untitled Task Board</h5>
-                                <small class="text-muted">Completed 21 out of 32 Tasks</small>
-                            </div>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                        data-bs-toggle="dropdown" aria-expanded="true">
-                                    <i class="bx bx-dots-vertical-rounded"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="javascript:void(0))">
-                                        <i class="bx bx-edit-alt me-1"></i>
-                                        <span>Edit</span>
-                                    </a>
-                                    <a class="dropdown-item" href="javascript:void(0))">
-                                        <i class="bx bx-trash me-1"></i>
-                                        <span>Delete</span>
-                                    </a>
+                @if (Model.Count > 0)
+                {
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex align-items-center justify-content-between pb-0">
+                                    <div class="card-title mb-0">
+                                        <h5 class="m-0 me-2">@(string.IsNullOrWhiteSpace(item.Title) ? "Untitled Project" : item.Title)</h5>
+                                        <small class="text-muted">Created by @item.CreatedBy</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                                data-bs-toggle="dropdown" aria-expanded="true">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a name="edit-modal" id="@item.Id" class="dropdown-item" href="javascript:void(0))">
+                                                <i class="bx bx-edit-alt me-1"></i>
+                                                <span>Edit</span>
+                                            </a>
+                                            <a name="delete" id="@item.Id" class="dropdown-item text-danger" href="javascript:void(0))">
+                                                <i class="bx bx-trash me-1"></i>
+                                                <span>Delete</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(item.Description))
+                                {
+                                    <div class="card-header p-2 mx-3 mb-3 mt-2 alert alert-secondary">
+                                        <small>
+                                            @item.Description
+                                        </small>
+                                    </div>
+                                }
+                                <div class="card-body d-flex flex-column justify-content-end">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-2">Task Board Progress:</h6>
+                                        <span class="text-muted">
+                                            @item.Tasks.Where(e => e.Status == AppTaskStatus.InProgress).Count() / @item.Tasks.Count
+                                        </span>
+                                    </div>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-end">
+                                        <a class="btn btn-primary btn-sm" href="/project/taskboard">
+                                            Open Task Board
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <h6 class="mb-2">Task Board Progress:</h6>
-                            <div class="progress mb-3">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <a class="btn btn-primary btn-sm" href="/project/taskboard">
-                                    Open Task Board
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                    }
+                }
+                else
+                {
+                    <div class="text-muted">You don't have any task boards yet</div>
+                }
             </div>
         </div>
     </div>
@@ -71,6 +170,104 @@
     <script>
         $(function () {
             $('#progress-mbtn').addClass('active')
+
+            $('.ajax-form').on('submit', function (e) {
+                e.preventDefault()
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: $(this).attr('method'),
+                    data: $(this).serialize(),
+                    headers: {
+                        'RequestVerificationToken':
+                            $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.statusCode == 200) {
+                            window.location.reload(true)
+                        } else {
+                            $(this)
+                            .find('.error-area')
+                            .html(`<span class="text-danger my-2">${result.msg}</span>`)
+                        }
+                    }
+                })
+            })
+
+            $('#create-task').on('click', function () {
+                $("#basicModal").find('form')[0].reset()
+                $("#basicModal").modal('show')
+            })
+
+            $('a[name="edit-modal"]').on('click', function () {
+                var id = $(this).attr('id')
+
+                $.ajax({
+                    url: '/project/gettaskboard/' + id,
+                    method: 'get',
+                    headers: {
+                        'RequestVerificationToken':
+                            $(this).find('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.statusCode == 200) {
+                            $("#editModal").find('input[name="Id"]').val(result.data.id)
+                            $("#editModal").find('input[name="Title"]').val(result.data.title)
+                            $("#editModal").find('textarea[name="Description"]').val(result.data.description)
+                            $("#editModal").modal('show')
+                        } else {
+                            Swal.fire({
+                              title: "Oops..",
+                              text: result.msg || 'Unknown Error Occurred',
+                              icon: "error"
+                            })
+                        }
+                    }
+                })
+
+            })
+
+            $(document).on('click', 'a[name="delete"]', function () {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This task board will be removed from the project",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, remove it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/project/deletetaskboard/' + $(this).attr('id'),
+                            method: 'post',
+                            headers: {
+                                'RequestVerificationToken':
+                                    $('input[name="__RequestVerificationToken"]').val()
+                            },
+                        }).fail(xhr => {
+                            Swal.fire({
+                                title: "Oops..",
+                                text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                icon: "error"
+                            });
+                        }).done((result) => {
+                            if(result.statusCode == 200) {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "Member Removed Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: result.msg || "An error occurred...",
+                                    icon: "error"
+                                })
+                            }
+                        })
+                    }
+                });
+            });
         })
     </script>
 }

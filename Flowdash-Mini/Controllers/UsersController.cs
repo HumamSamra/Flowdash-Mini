@@ -121,7 +121,7 @@ namespace Flowdash_Mini.Areas.Admin.Controllers
                 {
                     if (!await _roleManager.RoleExistsAsync(role))
                     {
-                        ModelState.AddModelError("", $"Role '{role}' Doesn't Exist!");
+                        ModelState.AddModelError(string.Empty, $"Role '{role}' Doesn't Exist!");
                         return View(model);
                     }
                 }

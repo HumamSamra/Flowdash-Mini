@@ -4,11 +4,14 @@ using Flowdash_Mini.Enums;
 using Flowdash_Mini.Extensions;
 using Flowdash_Mini.Models.Accounts;
 using Flowdash_Mini.Models.Projects;
+using Flowdash_Mini.Models.TaskBoards;
 using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
+using Flowdash_Mini.ViewModels.Activities;
 using Flowdash_Mini.ViewModels.Announcements;
 using Flowdash_Mini.ViewModels.Members;
 using Flowdash_Mini.ViewModels.Projects;
+using Flowdash_Mini.ViewModels.TaskBoards;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +62,7 @@ namespace Flowdash_Mini.Controllers
                 e => e.MemberId == User.GetUserId()).MemberType;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             var code = CookieHandler.Get(CookieName, HttpContext)!;
@@ -66,6 +70,7 @@ namespace Flowdash_Mini.Controllers
             return View(_mapper.Map<ProjectVM>(project));
         }
 
+        [HttpGet]
         public IActionResult Requests()
         {
             if (ViewBag.MemberType != MemberType.Owner)
@@ -83,6 +88,7 @@ namespace Flowdash_Mini.Controllers
             return View();
         }
 
+        [HttpGet]
         public IActionResult Announcements()
         {
             var code = CookieHandler.Get(CookieName, HttpContext)!;
@@ -96,8 +102,10 @@ namespace Flowdash_Mini.Controllers
                 list.OrderByDescending(e => e.CreatedAt)));
         }
 
+        [HttpPost]
         public JsonResult CreateAnnouncemnet(CreateAnnouncementVM model)
         {
+            // Restrict Creating Announcements for owners only
             if (ViewBag.MemberType != MemberType.Owner)
             {
                 return Json(new { statusCode = 403, msg = "ACCESS DENIED" });
@@ -110,20 +118,21 @@ namespace Flowdash_Mini.Controllers
                 return Json(new { statusCode = 404, msg = "Project not found" });
             }
 
-            var user = _userManager.Users.FirstOrDefault(
-                e => e.Id == User.GetUserId());
-            if (user == null)
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
             {
                 return Json(new { statusCode = 404, msg = "User not found" });
             }
 
             var item = new ProjectAnnouncement()
             {
-                CreatedBy = user.FullName,
+                CreatedBy = member.Member.FullName,
                 ProjectId = project.Id,
                 Text = model.Text
             };
             _unitOfWork.Announcements.Create(item);
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Announcement '{model.Text}' was posted successfully"));
 
             return Json(new { statusCode = 200 });
         }
@@ -138,6 +147,18 @@ namespace Flowdash_Mini.Controllers
                 return Json(new { statusCode = 403, msg = "ACCESS DENIED" });
             }
 
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User not found" });
+            }
+
             var item = _unitOfWork.Announcements.GetById(new Guid(id));
             if (item == null || item.Project.ProjectCode != code)
             {
@@ -145,6 +166,9 @@ namespace Flowdash_Mini.Controllers
             }
 
             _unitOfWork.Announcements.Delete(item.Id);
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Announcement '{item.Text}' was deleted successfully"));
+
             return Json(new { statusCode = 200 });
         }
 
@@ -156,17 +180,145 @@ namespace Flowdash_Mini.Controllers
                 return Redirect("/project");
             }
 
-            return View();
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var logs = _unitOfWork.Projects.GetLogs(code);
+
+            return View(_mapper.Map<List<ProjectLogVM>>(logs));
         }
 
+        [HttpGet]
         public IActionResult Progress()
         {
-            return View();
+            var taskBoards = _unitOfWork.TaskBoards.GetAll();
+            return View(_mapper.Map<List<TaskBoardVM>>(taskBoards));
         }
 
+        [HttpGet]
         public IActionResult TaskBoard()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult CreateTaskBoard(CreateTaskBoardVM model)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User not found" });
+            }
+
+            var taskBoard = _mapper.Map<AppTaskBoard>(model);
+            taskBoard.ProjectId = project.Id;
+            taskBoard.CreatedBy = member.Member.FullName;
+            _unitOfWork.TaskBoards.Create(taskBoard);
+
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Task Board '{taskBoard.Title}' was created successfully"));
+
+            return Json(new { statusCode = 200, });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetTaskBoard(string id)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Json(new { statusCode = 400, msg = "Please provide a valid Id" });
+            }
+
+            var taskBoard = _unitOfWork.TaskBoards.GetById(new Guid(id));
+            if (taskBoard == null)
+            {
+                return Json(new { statusCode = 400, msg = "Task Board was not found" });
+            }
+
+            return Json(new { statusCode = 200, data = _mapper.Map<TaskBoardVM>(taskBoard) });
+        }
+
+        [HttpPost("/project/deletetaskboard/{id}")]
+        [ValidateAntiForgeryToken]
+        public JsonResult DeleteTaskBoard(string id)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Json(new { statusCode = 400, msg = "Please provide a valid Id" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User not found" });
+            }
+
+            var taskBoard = _unitOfWork.TaskBoards.GetById(new Guid(id));
+            if (taskBoard == null)
+            {
+                return Json(new { statusCode = 400, msg = "Task Board was not found" });
+            }
+
+            _unitOfWork.TaskBoards.Delete(taskBoard.Id);
+
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Task Board '{taskBoard.Title}' was deleted successfully"));
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult EditTaskBoard(EditTaskBoardVM model)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            var taskBoard = _unitOfWork.TaskBoards.GetById(model.Id);
+            if (taskBoard == null)
+            {
+                return Json(new { statusCode = 400, msg = "Task board was not found" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User not found" });
+            }
+
+            taskBoard.Title = model.Title ?? "";
+            taskBoard.Description = model.Description ?? "";
+            taskBoard.ModifiedBy = User.GetUserName();
+
+            _unitOfWork.TaskBoards.Update(taskBoard);
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Task Board '{taskBoard.Title}' was modified successfully"));
+
+            return Json(new { statusCode = 200, });
         }
 
         public IActionResult Members()
@@ -197,50 +349,80 @@ namespace Flowdash_Mini.Controllers
                 return Redirect("/project/members");
             }
 
-            var member = _unitOfWork.Members.GetById(new Guid(id));
-            if (member == null || member.MemberType == MemberType.Owner)
+            var item = _unitOfWork.Members.GetById(new Guid(id));
+            if (item == null || item.MemberType == MemberType.Owner)
             {
                 return Redirect("/project/members");
             }
-            return View(_mapper.Map<EditProjectMemberVM>(member));
+
+            return View(_mapper.Map<EditProjectMemberVM>(item));
         }
 
         [HttpPost("/project/editmember/{id}")]
         [ValidateAntiForgeryToken]
         public IActionResult EditMember(EditProjectMemberVM model)
         {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
             if (ViewBag.MemberType != MemberType.Owner)
             {
                 return Redirect("/project/members");
             }
 
-            var member = _unitOfWork.Members.GetById(model.Id);
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Redirect("/project");
+            }
+
+            var item = _unitOfWork.Members.GetById(model.Id);
+            if (item == null)
+            {
+                ModelState.AddModelError(string.Empty, "Requested Member was not found");
+                return View(model);
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
             if (member == null)
             {
-                ModelState.AddModelError("", "Requested Member was not found");
-                return View(model);
+                return Json(new { statusCode = 404, msg = "User not found" });
             }
 
             if (model.MemberType == MemberType.Owner)
             {
-                ModelState.AddModelError("", "To transfer project ownership, please refer to the members tab");
+                ModelState.AddModelError(string.Empty, "To transfer project ownership, please refer to the members tab");
                 return View(model);
             }
 
-            member.MemberType = model.MemberType;
-            _unitOfWork.Members.Update(member);
+            item.MemberType = model.MemberType;
+            _unitOfWork.Members.Update(item);
+
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Member '{item.Member.FullName}' was modified successfully"));
+
             return Redirect("/project/members");
         }
 
         [HttpPost("/project/removemember/{id}")]
         public JsonResult RemoveMember(string id)
         {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
             if (ViewBag.MemberType != MemberType.Owner)
             {
                 return Json(new { statusCode = 403, msg = "ACCESS DENIED" });
             }
 
-            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User not found" });
+            }
+
             var item = _unitOfWork.Members.GetById(new Guid(id));
             if (item == null || item.Project.ProjectCode != code!)
             {
@@ -248,6 +430,9 @@ namespace Flowdash_Mini.Controllers
             }
 
             _unitOfWork.Members.Delete(item.Id);
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Member '{item.Member.FullName}' was modified successfully"));
+
             return Json(new { statusCode = 200 });
         }
 
@@ -282,6 +467,9 @@ namespace Flowdash_Mini.Controllers
             item.MemberType = MemberType.Owner;
             _unitOfWork.Members.Update(item);
 
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, owner.Member.FullName,
+                owner.MemberType, $"Ownership transferred from '{owner.Member.FullName}' to '{item.Member.FullName}'"));
+
             return Json(new { statusCode = 200 });
         }
 
@@ -299,17 +487,10 @@ namespace Flowdash_Mini.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Manage(EditProjectVM model)
+        public IActionResult Manage(EditProjectVM model)
         {
             var members = _unitOfWork.Members.GetAllByProjectId(model.Id).ToList();
             ViewBag.Members = _mapper.Map<List<ProjectMemberVM>>(members);
-
-            var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
-            if (!await _captcha.VerifyAsync(reCaptchaToken))
-            {
-                ModelState.AddModelError("", "Invalid reCaptcha token");
-                return View(model);
-            }
 
             if (!ModelState.IsValid)
             {
@@ -319,8 +500,14 @@ namespace Flowdash_Mini.Controllers
             var project = _unitOfWork.Projects.GetById(model.Id)!;
             if (project == null)
             {
-                ModelState.AddModelError("", "Project not found");
+                ModelState.AddModelError(string.Empty, "Project not found");
                 return View(model);
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User not found" });
             }
 
             project.ProjectName = model.ProjectName;
@@ -333,7 +520,7 @@ namespace Flowdash_Mini.Controllers
                 if (model.State == ProjectState.Personal &&
                     project.Members.Count > 1)
                 {
-                    ModelState.AddModelError("", "Cannot change state to Personal when other members exist");
+                    ModelState.AddModelError(string.Empty, "Cannot change state to Personal when other members exist");
                     return View(model);
                 }
             }
@@ -345,9 +532,11 @@ namespace Flowdash_Mini.Controllers
             project.MaxMembersLimit = model.MaxMembersLimit;
             if (project.Members.Count > model.MaxMembersLimit)
             {
-                ModelState.AddModelError("", "You cannot set the member limit below the current number of members");
+                ModelState.AddModelError(string.Empty, "You cannot set the member limit below the current number of members");
                 return View(model);
             }
+
+
 
             project.ModifiedBy = User.GetUserName();
             project.ModifiedAt = DateTime.UtcNow;
@@ -357,6 +546,9 @@ namespace Flowdash_Mini.Controllers
             project.Deadline = DateTime.Parse(date.Last().Trim());
 
             _unitOfWork.Projects.Update(project);
+
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                 member.MemberType, $"Project was modified successfully"));
 
             return RedirectToAction(nameof(Index));
         }

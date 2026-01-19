@@ -1,7 +1,10 @@
-﻿namespace Flowdash_Mini.ViewModels.Announcements
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Flowdash_Mini.ViewModels.Announcements
 {
     public class CreateAnnouncementVM
     {
-        public string Text { get; set; }
+        [Required]
+        public string Text { get; set; } = string.Empty;
     }
 }

@@ -54,5 +54,28 @@ namespace Flowdash_Mini.Repositories.Projects
                 _context.SaveChanges();
             }
         }
+
+        public void Log(ProjectLog log)
+        {
+            log.CreatedAt = DateTime.UtcNow;
+            _context.ProjectLogs.Add(log);
+            _context.SaveChanges();
+        }
+
+        public IQueryable<ProjectLog> GetLogs(string code)
+        {
+            return _context.ProjectLogs
+                .Include(e => e.Project)
+                .Where(l => l.Project.ProjectCode == code)
+                .AsQueryable();
+        }
+
+        public IQueryable<ProjectLog> GetLogs(Guid projectId)
+        {
+            return _context.ProjectLogs
+                .Include(e => e.Project)
+                .Where(l => l.ProjectId == projectId)
+                .AsQueryable();
+        }
     }
 }

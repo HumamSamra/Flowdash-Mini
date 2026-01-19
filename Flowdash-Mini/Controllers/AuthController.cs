@@ -61,7 +61,7 @@ namespace Flowdash_Mini.Controllers
             var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
             if (!await _captcha.VerifyAsync(reCaptchaToken))
             {
-                ModelState.AddModelError("", "Invalid reCaptcha token");
+                ModelState.AddModelError(string.Empty, "Invalid reCaptcha token");
                 return View(model);
             }
 
@@ -75,20 +75,20 @@ namespace Flowdash_Mini.Controllers
                 x => x.UserName == model.Account || x.Email == model.Account);
             if (user == null)
             {
-                ModelState.AddModelError("", "Username or Password is not correct");
+                ModelState.AddModelError(string.Empty, "Username or Password is not correct");
                 return View(model);
             }
 
             var result = await _userManager.CheckPasswordAsync(user, model.Password);
             if (!result)
             {
-                ModelState.AddModelError("", "Username or Password is not correct");
+                ModelState.AddModelError(string.Empty, "Username or Password is not correct");
                 return View(model);
             }
 
             if (await _userManager.IsLockedOutAsync(user))
             {
-                ModelState.AddModelError("", "This user is disabled, and can not login");
+                ModelState.AddModelError(string.Empty, "This user is disabled, and can not login");
                 return View(model);
             }
 
@@ -114,7 +114,7 @@ namespace Flowdash_Mini.Controllers
                         new List<string>() { user.Email! });
                 if (!res.Succeeded)
                 {
-                    ModelState.AddModelError("", "Couldn't send e-mail verification link");
+                    ModelState.AddModelError(string.Empty, "Couldn't send e-mail verification link");
                     return View(model);
                 }
 
@@ -155,7 +155,7 @@ namespace Flowdash_Mini.Controllers
             var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
             if (!await _captcha.VerifyAsync(reCaptchaToken))
             {
-                ModelState.AddModelError("", "Invalid reCaptcha token");
+                ModelState.AddModelError(string.Empty, "Invalid reCaptcha token");
                 return View(model);
             }
 
@@ -170,7 +170,7 @@ namespace Flowdash_Mini.Controllers
             {
                 foreach (var err in result.Errors)
                 {
-                    ModelState.AddModelError("", err.Description);
+                    ModelState.AddModelError(string.Empty, err.Description);
                 }
                 return View(model);
             }
@@ -189,7 +189,7 @@ namespace Flowdash_Mini.Controllers
                     new List<string>() { user.Email! });
             if (!res.Succeeded)
             {
-                ModelState.AddModelError("", "Couldn't send e-mail verification link");
+                ModelState.AddModelError(string.Empty, "Couldn't send e-mail verification link");
                 return View(model);
             }
 
@@ -247,14 +247,14 @@ namespace Flowdash_Mini.Controllers
             var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
             if (!await _captcha.VerifyAsync(reCaptchaToken))
             {
-                ModelState.AddModelError("", "Invalid reCaptcha token");
+                ModelState.AddModelError(string.Empty, "Invalid reCaptcha token");
                 return View(model);
             }
 
             var user = await _userManager.FindByIdAsync(model.UserId.ToString());
             if (user == null || string.IsNullOrWhiteSpace(model.Password) || string.IsNullOrWhiteSpace(model.Token))
             {
-                ModelState.AddModelError("", "The token provided is not valid");
+                ModelState.AddModelError(string.Empty, "The token provided is not valid");
                 return View(model);
             }
 
@@ -264,7 +264,7 @@ namespace Flowdash_Mini.Controllers
             {
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError("", error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
                 return View(model);
             }

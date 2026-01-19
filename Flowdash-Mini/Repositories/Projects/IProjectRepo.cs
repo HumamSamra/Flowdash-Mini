@@ -10,5 +10,9 @@ namespace Flowdash_Mini.Repositories.Projects
         void Create(Project item);
         void Update(Project modifiedItem);
         void Delete(Guid id);
+
+        IQueryable<ProjectLog> GetLogs(string code);
+        IQueryable<ProjectLog> GetLogs(Guid projectId);
+        void Log(ProjectLog log);
     }
 }

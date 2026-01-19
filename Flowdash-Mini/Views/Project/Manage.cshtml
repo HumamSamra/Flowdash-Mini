@@ -1,7 +1,6 @@
 ﻿@using Flowdash_Mini.Enums
 @using Flowdash_Mini.ViewModels.Members
 @using Flowdash_Mini.ViewModels.Projects
-@using Microsoft.Extensions.Options
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
@@ -11,7 +10,6 @@
     List<ProjectMemberVM> members = ViewBag.Members;
     string date = Model.DateRange;
 }
-@inject IOptions<CaptchaOptions> captcha
 @model EditProjectVM
 
 <div class="card mb-4">
@@ -121,35 +119,12 @@
 </div>
 
 @section Scripts {
-    <script src="https://www.google.com/recaptcha/api.js?hl=en&render=@captcha.Value.SiteKey" async defer></script>
     <script src="~/lib/choices/choices.min.js"></script>
     <script>
         $(function () {
             // Begin Script
             $('#a1-3db').text('@Model.MaxMembersLimit')
             $('#manage-mbtn').addClass('active')
-
-            let captchaDone = false;
-            $("#reCaptcha-form").on('submit', function (e) {
-                if (captchaDone) return;
-
-                e.preventDefault();
-
-                const form = this;
-                if (!form.checkValidity()) {
-                    form.classList.add('was-validated');
-                    return;
-                }
-
-                grecaptcha.ready(function () {
-                    grecaptcha.execute('@captcha.Value.SiteKey', { action: 'RESET_PASSWORD' })
-                        .then(function (token) {
-                            form.querySelector('input[name="g-recaptcha-response"]').value = token;
-                            captchaDone = true;
-                            form.submit();
-                        });
-                });
-            });
 
             var textRemove = new Choices(document.getElementById('basic-default-tags'), {
               delimiter: ',',

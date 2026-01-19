@@ -28,7 +28,7 @@
             submitBtn.addClass('disabled');
         }
 
-        form.on('input', () => {
+        form.on('input change', 'input, select, textarea', () => {
             if (!form[0].checkValidity()) {
                 submitBtn.addClass('disabled');
             } else {
