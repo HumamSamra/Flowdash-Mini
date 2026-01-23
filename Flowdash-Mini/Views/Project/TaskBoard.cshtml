@@ -1,10 +1,12 @@
-﻿@*
+﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.ViewModels.Tasks
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
     ViewData["Title"] = "Task Board";
 }
-
+@model List<TaskVM>
 @section Styles {
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/summernote/summernote-lite.min.css" />
 }
@@ -63,14 +65,14 @@
             <h5>In Progress Tasks</h5>
             <div class="demo-inline-spacing mt-3">
                 <div class="list-group">
-                    @for (int i = 1; i <= 10; i++)
+                    @foreach (var item in Model.Where(e => e.Status == AppTaskStatus.Completed))
                     {
-                        <div class="list-group-item list-group-item-action flex-column align-items-start p-3">
+                        <div href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start p-3">
                             <div class="d-flex align-items-center gap-3">
                                 <i class="fs-20 bx bx-menu handle"></i>
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between w-100">
-                                        <h6>Task Number (@(i))</h6>
+                                        <h6>@item.Title</h6>
                                         <div class="dropdown">
                                             <button class="btn p-0" type="button" id="orederStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 <i class="bx bx-dots-vertical-rounded"></i>
@@ -88,10 +90,10 @@
                                         </div>
                                     </div>
                                     <p class="mb-1">
-                                        Details related to this task will be explained here, this is a sample test.
+                                        @Html.Raw(item.Description)
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <small>14 Aug, 2025 11:30 PM</small>
+                                        <small>@item.CreatedAt.ToString("dd MMM, yyyy hh:mm tt")</small>
                                         <div class="d-flex align-items-center gap-2">
                                             <button class="btn btn-success btn-sm">
                                                 Done
@@ -108,23 +110,40 @@
             <h5 class="mt-4">Completed Tasks</h5>
             <div class="demo-inline-spacing mt-3">
                 <div class="list-group">
-                    <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start p-3">
-                        <div class="d-flex justify-content-between w-100">
-                            <h6 class="text-decoration-line-through">Task Number Two</h6>
-                            <small class="text-decoration-line-through">3 days ago</small>
-                        </div>
-                        <p class="mb-1 text-decoration-line-through">
-                            Details related to this task will be explained here, this is a sample test.
-                        </p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small>Completed on 14 Aug, 2025 11:30 PM by Humam Samra</small>
-                            <div class="d-flex align-items-center gap-2">
-                                <button class="btn btn-danger btn-sm">
-                                    In Progress
-                                </button>
+                    @foreach (var item in Model.Where(e => e.Status == AppTaskStatus.InProgress))
+                    {
+                        <div href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start p-3">
+                            <div class="d-flex justify-content-between w-100">
+                                <h6 class="text-decoration-line-through">@item.Title</h6>
+                                <div class="dropdown">
+                                    <button class="btn p-0" type="button" id="orederStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
+                                        <a class="dropdown-item d-flex gap-2 align-items-center" href="javascript:void(0);">
+                                            <i class="bx bx-edit"></i>
+                                            <span>Edit Task</span>
+                                        </a>
+                                        <a class="dropdown-item d-flex gap-2 align-items-center text-danger" href="javascript:void(0);">
+                                            <i class="bx bx-trash"></i>
+                                            <span>Delete Task</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mb-1 text-decoration-line-through">
+                                @Html.Raw(item.Description)
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>Completed on @item.CompletedAt.ToString("dd MMM, yyyy hh:mm tt") by @item.CompletedBy</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-danger btn-sm">
+                                        In Progress
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </a>
+                    }
                 </div>
             </div>
 

@@ -12,6 +12,7 @@ using Flowdash_Mini.ViewModels.Announcements;
 using Flowdash_Mini.ViewModels.Members;
 using Flowdash_Mini.ViewModels.Projects;
 using Flowdash_Mini.ViewModels.TaskBoards;
+using Flowdash_Mini.ViewModels.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -181,7 +182,9 @@ namespace Flowdash_Mini.Controllers
             }
 
             var code = CookieHandler.Get(CookieName, HttpContext)!;
-            var logs = _unitOfWork.Projects.GetLogs(code);
+            var logs = _unitOfWork.Projects.GetLogs(code)
+                .OrderByDescending(e => e.CreatedAt)
+                .ToList();
 
             return View(_mapper.Map<List<ProjectLogVM>>(logs));
         }
@@ -193,10 +196,13 @@ namespace Flowdash_Mini.Controllers
             return View(_mapper.Map<List<TaskBoardVM>>(taskBoards));
         }
 
-        [HttpGet]
-        public IActionResult TaskBoard()
+        [HttpGet("/project/taskboard/{id}")]
+        public IActionResult TaskBoard(string id)
         {
-            return View();
+            var t = _unitOfWork.Tasks.GetAll()
+                .Where(e => e.TaskBoardId == new Guid(id))
+                .ToList();
+            return View(_mapper.Map<TaskVM>(t));
         }
 
         [HttpPost]

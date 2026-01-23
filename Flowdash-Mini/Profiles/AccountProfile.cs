@@ -11,6 +11,7 @@ namespace Flowdash_Mini.Profiles
             CreateMap<AppUser, RegisterVM>().ReverseMap();
             CreateMap<AppUser, LoginVM>().ReverseMap();
             CreateMap<AppUser, AppUserVM>().ReverseMap();
+            CreateMap<AppUser, UserVM>().ReverseMap();
             CreateMap<AppUser, EditUserVM>().ReverseMap();
             CreateMap<AppUser, CreateUserVM>().ReverseMap();
         }

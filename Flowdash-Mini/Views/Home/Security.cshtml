@@ -1,38 +1,40 @@
 ﻿@using Flowdash_Mini.ViewModels.Accounts
+@using Flowdash_Mini.ViewModels.Security
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    ViewData["Title"] = "My Account";
+    ViewData["Title"] = "Security";
 }
-@model UserVM
+@model ChangePasswordVM
 
 <div class="row">
     <div class="col-md-12">
         <div class="card mb-4">
-            <h5 class="card-header">Profile Details</h5>
+            <h5 class="card-header">Password & Security</h5>
             <!-- Account -->
             <div class="card-body">
-                <form id="formAccountSettings" method="POST" class="extra-validate" novalidate autocomplete="off">
+                <form id="formAccountSettings2" method="POST" class="extra-validate" novalidate>
                     <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="fullname" class="form-label">Full Name</label>
-                            <input class="form-control" type="text" id="fullname" asp-for="FullName" autofocus="" required>
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="username" class="form-label">Username</label>
-                            <input class="form-control" type="text" asp-for="UserName" id="username" autocapitalize="off" required>
+                        <div class="mb-3 col-md-12">
+                            <label for="pwd" class="form-label">Current Password</label>
+                            <input asp-for="CurrentPassword" class="form-control" type="password" id="pwd" required placeholder="Enter Current Password">
                         </div>
                         <div class="mb-3 col-md-12">
-                            <label for="email" class="form-label">E-mail</label>
-                            <input class="form-control mb-1" type="text" id="email" asp-for="Email" required placeholder="john.doe@example.com">
-                            <small class="text-muted d-flex gap-1 align-items-center">
-                                <i class="bxf  bx-message-circle-detail"></i>
-                                <span>
-                                    Please note that changing your account will log you out to re-confirm your e-mail
-                                </span>
-                            </small>
+                            <label for="pwd1" class="form-label">New Password</label>
+                            <input asp-for="Password" class="form-control" type="password" id="pwd1" required placeholder="Enter New Password">
                         </div>
+                        <div class="mb-3 col-md-12">
+                            <label for="pwd2" class="form-label">Confirm Password</label>
+                            <input asp-for="ConfirmPassword" class="form-control" type="password" id="pwd2" required placeholder="Confirm New Password">
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" asp-for="LogEveryoneOut" type="checkbox" name="logout" id="accountActivationd">
+                                <label class="form-check-label" for="accountActivationd">Logout everyone signed in with this account</label>
+                            </div>
+                        </div>
+
                         @if (!ViewData.ModelState.IsValid)
                         {
                             @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
@@ -45,16 +47,15 @@
                                 </div>
                             }
                         }
-                        else if (ViewBag.Success != null && ViewBag.Success == true)
+                        else if (ViewBag.Success != null)
                         {
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <ul class="mb-0">
-                                    <li>Account Updated Successfully</li>
+                                    <li>@ViewBag.Success</li>
                                 </ul>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         }
-
                         <div class="mt-2">
                             <button type="submit" class="btn btn-primary me-2">Save changes</button>
                             <button type="reset" class="btn btn-outline-secondary">Clear</button>
@@ -70,7 +71,7 @@
 @section Scripts {
     <script>
         $(function () {
-            $('#my-acc-mbtn').addClass('active')
+            $('#sec-mbtn').addClass('active')
         })
     </script>
 }

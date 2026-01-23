@@ -13,6 +13,8 @@ namespace Flowdash_Mini.ViewModels.Tasks
 
         public AppTaskStatus Status { get; set; } = AppTaskStatus.InProgress;
 
+        public DateTime CompletedAt { get; set; }
+        public string CompletedBy { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string CreatedBy { get; set; } = null!;
         public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;

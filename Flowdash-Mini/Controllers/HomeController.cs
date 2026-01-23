@@ -3,12 +3,15 @@ using Flowdash_Mini.Classes;
 using Flowdash_Mini.Enums;
 using Flowdash_Mini.Extensions;
 using Flowdash_Mini.Models;
+using Flowdash_Mini.Models.Accounts;
 using Flowdash_Mini.Models.Projects;
 using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
 using Flowdash_Mini.ViewModels.Accounts;
 using Flowdash_Mini.ViewModels.Projects;
+using Flowdash_Mini.ViewModels.Security;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -20,13 +23,18 @@ namespace Flowdash_Mini.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private const string CookieName = "MEMORY_PROJECT_CODE";
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly ICaptchaService _captcha;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork,
-                                IMapper mapper, ICaptchaService captcha)
+                                IMapper mapper, ICaptchaService captcha,
+                                UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
+            _signInManager = signInManager;
+            _userManager = userManager;
             _captcha = captcha;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -58,16 +66,109 @@ namespace Flowdash_Mini.Controllers
             return View();
         }
 
-        [HttpGet("/MyAccount")]
-        public IActionResult MyAccount()
+        [HttpGet("/Invites")]
+        public IActionResult Invites()
         {
             return View();
         }
 
-        [HttpPost("/MyAccount")]
-        public IActionResult MyAccount(EditUserVM model)
+        [HttpGet("/security")]
+        public IActionResult Security()
         {
             return View();
+        }
+
+        [HttpPost("/security")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Security(ChangePasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "User was not found");
+                return View(model);
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.Password);
+            if (!result.Succeeded)
+            {
+                foreach (var err in result.Errors)
+                {
+                    ModelState.AddModelError(err.Code, err.Description);
+                }
+                return View(model);
+            }
+
+            if (model.LogEveryoneOut)
+            {
+                await _userManager.UpdateSecurityStampAsync(user);
+                await _signInManager.SignOutAsync();
+                return Redirect("/auth/login?returnUrl=/user/security");
+            }
+
+            ViewBag.Success = "Password has been changed successfully";
+            return View(model);
+        }
+
+        [HttpGet("/MyAccount")]
+        public async Task<IActionResult> MyAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Redirect("/");
+            }
+            var model = _mapper.Map<UserVM>(user);
+            return View(model);
+        }
+
+        [HttpPost("/MyAccount")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MyAccount(UserVM model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Redirect("/");
+            }
+
+            bool logout = false;
+            if (model.Email.Trim().ToLower() != user.Email!.Trim().ToLower())
+            {
+                logout = true;
+                user.EmailConfirmed = false;
+            }
+
+            var map = _mapper.Map(model, user);
+            map.ModifiedBy = User.GetUserName();
+            map.ModifiedAt = DateTime.UtcNow;
+
+
+            var result = await _userManager.UpdateAsync(map);
+            if (!result.Succeeded)
+            {
+                foreach (var err in result.Errors)
+                {
+                    ModelState.AddModelError(err.Code, err.Description);
+                    return View(model);
+                }
+            }
+
+            if (logout)
+            {
+                await _userManager.UpdateSecurityStampAsync(user);
+                await _signInManager.SignOutAsync();
+                return Redirect("/auth/login?returnUrl=/myaccount");
+            }
+
+            ViewBag.Success = true;
+
+            return View(model);
         }
 
         [HttpGet("/createproject")]
