@@ -1,4 +1,5 @@
 ﻿@using Flowdash_Mini.Enums
+@using Flowdash_Mini.ViewModels.Activities
 @using Flowdash_Mini.ViewModels.Projects
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -55,7 +56,7 @@
                                 </a>
                             </div>
                             <span class="fw-semibold d-block mb-1">Total Boards</span>
-                            <h3 class="card-title mb-0">24</h3>
+                            <h3 class="card-title mb-0">@Model.TaskBoards.Count</h3>
                         </div>
                     </div>
                 </div>
@@ -70,7 +71,7 @@
                                 </div>
                             </div>
                             <span class="fw-semibold d-block mb-1">Total Finished Tasks</span>
-                            <h3 class="card-title mb-0">156</h3>
+                            <h3 class="card-title mb-0">@(ViewBag.FinishedTasks)</h3>
                         </div>
                     </div>
                 </div>
@@ -85,7 +86,7 @@
                                 </div>
                             </div>
                             <span class="fw-semibold d-block mb-1">Total In Progress Tasks</span>
-                            <h3 class="card-title mb-0">346</h3>
+                            <h3 class="card-title mb-0">@(ViewBag.InProgressTasks)</h3>
                         </div>
                     </div>
                 </div>
@@ -114,7 +115,7 @@
                                         </div>
                                         <div class="d-flex flex-column">
                                             <small>Start Date</small>
-                                            <h6 class="mb-0">12 Jan, 2026</h6>
+                                            <h6 class="mb-0">@Model.StartDate.ToString("dd MMM, yyyy")</h6>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center bg-hover-light rounded-3 w-100 p-2">
@@ -123,7 +124,7 @@
                                         </div>
                                         <div class="d-flex flex-column">
                                             <small>End Date</small>
-                                            <h6 class="mb-0">21 Aug, 2026</h6>
+                                            <h6 class="mb-0">@Model.Deadline.ToString("dd MMM, yyyy")</h6>
                                         </div>
                                     </div>
                                 </div>
@@ -133,63 +134,43 @@
                 </div>
             </div>
             <!--/ Total Revenue -->
-            <div class="col-md-6 col-lg-4 order-2 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="card-title m-0 me-2">Last 4 Activities</h5>
-                        <a href="/project/actions">View All</a>
-                    </div>
-                    <div class="card-body px-3">
-                        <ul class="p-0 m-0">
-                            @for (int i = 0; i < 4; i++)
-                            {
-                                var rnd = new Random().Next(0, 4);
-
-                                <li class="d-flex @(i == 3 ? "" : "mb-4") pb-1 bg-hover-light rounded-3 p-2">
-                                    <div class="avatar flex-shrink-0 me-3">
-                                        @if (rnd == 1)
-                                        {
-                                            <span class="avatar-initial rounded bg-label-secondary fs-20">
-                                                <i class='bx  bx-help-circle'></i>
-                                            </span>
-                                        }
-                                        else if (rnd == 2)
-                                        {
-                                            <span class="avatar-initial rounded bg-label-danger fs-20">
-                                                <i class='bx  bx-alert-circle'></i>
-                                            </span>
-                                        }
-                                        else if (rnd == 3)
-                                        {
+            @if (ViewBag.LastActivities != null)
+            {
+                <div class="col-md-6 col-lg-4 order-2 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="card-title m-0 me-2">Last 4 Activities</h5>
+                            <a href="/project/activity">View All</a>
+                        </div>
+                        <div class="card-body px-3">
+                            <ul class="p-0 m-0">
+                                @for (int i = 0; i < ((List<ProjectLogVM>)ViewBag.LastActivities).Count; i++)
+                                {
+                                    <li class="d-flex @(i == (ViewBag.LastActivities.Count - 1) ? "" : "mb-4") pb-1 bg-hover-light rounded-3 p-2">
+                                        <div class="avatar flex-shrink-0 me-3">
                                             <span class="avatar-initial rounded bg-label-primary fs-20">
                                                 <i class='bx  bx-pencil-circle'></i>
                                             </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="avatar-initial rounded bg-label-success fs-20">
-                                                <i class='bx  bx-check-circle'></i>
-                                            </span>
-                                        }
-                                    </div>
-                                    <div class="d-flex flex-column w-100 align-items-start justify-content-center gap-2 text-truncate">
-
-                                        <h6 class="mb-0 w-100">
-                                            <a href="#!" class="text-nowrap overflow-hidden w-100 d-block text-overflow-ellipses" title="Task (xd94FQxT) was completed by (Humam Samra)">
-                                                Task (xd94FQxT) was completed by (Humam Samra)
-                                            </a>
-                                        </h6>
-                                        <div class="user-progress d-flex align-items-center gap-1">
-                                            <i class="text-muted bx bx-calendar"></i>
-                                            <h6 class="mb-0 text-muted">19 Aug, 2026</h6>
                                         </div>
-                                    </div>
-                                </li>
-                            }
-                        </ul>
+                                        <div class="d-flex flex-column w-100 align-items-start justify-content-center gap-2 text-truncate">
+
+                                            <h6 class="mb-0 w-100">
+                                                <span class="text-nowrap overflow-hidden w-100 d-block text-overflow-ellipses" title="Task (xd94FQxT) was completed by (Humam Samra)">
+                                                    @(((ProjectLogVM)ViewBag.LastActivities[i]).Text)
+                                                </span>
+                                            </h6>
+                                            <div class="user-progress d-flex align-items-center gap-1">
+                                                <i class="text-muted bx bx-calendar"></i>
+                                                <h6 class="mb-0 text-muted">@(((ProjectLogVM)ViewBag.LastActivities[i]).CreatedAt.ToString("dd MMM, yyyy"))</h6>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         }
     </div>
 

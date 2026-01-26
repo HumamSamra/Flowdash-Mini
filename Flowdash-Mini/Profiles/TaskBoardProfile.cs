@@ -14,6 +14,8 @@ namespace Flowdash_Mini.Profiles
             CreateMap<AppTaskBoard, EditTaskBoardVM>().ReverseMap();
 
             CreateMap<AppTask, TaskVM>().ReverseMap();
+            CreateMap<AppTask, EditTaskVM>().ReverseMap();
+            CreateMap<AppTask, CreateTaskVM>().ReverseMap();
         }
     }
 }

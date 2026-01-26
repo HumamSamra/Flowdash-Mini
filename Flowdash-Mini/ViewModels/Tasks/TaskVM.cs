@@ -7,6 +7,8 @@ namespace Flowdash_Mini.ViewModels.Tasks
     {
         public Guid Id { get; set; }
 
+        public int Sort { get; set; }
+
         [Required]
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;

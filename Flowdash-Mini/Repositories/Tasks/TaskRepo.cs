@@ -37,6 +37,7 @@ namespace Flowdash_Mini.Repositories.Tasks
         public AppTask? GetById(Guid id)
             => _context.AppTasks
             .Include(e => e.TaskBoard)
+            .ThenInclude(e => e.Project)
             .FirstOrDefault(p => p.Id == id);
 
         public void Update(AppTask modifiedItem)

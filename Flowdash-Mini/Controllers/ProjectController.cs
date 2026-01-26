@@ -68,6 +68,23 @@ namespace Flowdash_Mini.Controllers
         {
             var code = CookieHandler.Get(CookieName, HttpContext)!;
             var project = _unitOfWork.Projects.GetByCode(code)!;
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (member != null && (member.MemberType == MemberType.Owner ||
+                member.MemberType == MemberType.Admin))
+            {
+                var logs = _unitOfWork.Projects.GetLogs(project.Id)
+                    .OrderByDescending(e => e.CreatedAt)
+                    .Take(4)
+                    .ToList();
+                ViewBag.LastActivities = _mapper.Map<List<ProjectLogVM>>(logs);
+            }
+
+            var tasks = _unitOfWork.Tasks.GetAll()
+                .Where(e => e.TaskBoard.ProjectId == project.Id);
+            ViewBag.FinishedTasks = tasks.Where(e => e.Status == AppTaskStatus.Completed).Count();
+            ViewBag.InProgressTasks = tasks.Where(e => e.Status == AppTaskStatus.InProgress).Count();
+
             return View(_mapper.Map<ProjectVM>(project));
         }
 
@@ -192,17 +209,232 @@ namespace Flowdash_Mini.Controllers
         [HttpGet]
         public IActionResult Progress()
         {
-            var taskBoards = _unitOfWork.TaskBoards.GetAll();
+            var taskBoards = _unitOfWork.TaskBoards.GetAll()
+                .Include(e => e.Tasks)
+                .ToList();
             return View(_mapper.Map<List<TaskBoardVM>>(taskBoards));
         }
 
         [HttpGet("/project/taskboard/{id}")]
         public IActionResult TaskBoard(string id)
         {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var taskBoard = _unitOfWork.TaskBoards.GetById(new Guid(id));
+            if (taskBoard == null || taskBoard.Project.ProjectCode != code)
+            {
+                return Redirect("/project");
+            }
+
+            ViewBag.TaskBoardId = taskBoard.Id;
+            ViewBag.TaskBoardName = taskBoard.Title;
+
             var t = _unitOfWork.Tasks.GetAll()
-                .Where(e => e.TaskBoardId == new Guid(id))
+                .Where(e => e.TaskBoardId == taskBoard.Id)
                 .ToList();
-            return View(_mapper.Map<TaskVM>(t));
+            return View(_mapper.Map<List<TaskVM>>(t));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult CreateTask(CreateTaskVM model)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage).ToList();
+                return Json(new { statusCode = 400, msg = errors[0] });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User was not found" });
+            }
+
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            var taskBoard = _unitOfWork.TaskBoards.GetById(model.TaskBoardId);
+            if (taskBoard == null)
+            {
+                return Json(new { statusCode = 404, msg = "Task Board not found" });
+            }
+
+            var item = _mapper.Map<AppTask>(model);
+            item.CreatedBy = member.Member.FullName;
+            item.ModifiedBy = member.Member.FullName;
+
+            if (item.Status == AppTaskStatus.Completed)
+            {
+                item.CompletedAt = DateTime.UtcNow;
+                item.CompletedBy = member.Member.FullName;
+            }
+
+            item.Sort = 1;
+            var maxTaskSort = _unitOfWork.Tasks.GetAll()
+                .Where(e => e.TaskBoardId == model.TaskBoardId)
+                .ToList();
+            if (maxTaskSort.Count > 0)
+            {
+                item.Sort = maxTaskSort.Max(e => e.Sort) + 1;
+            }
+
+            _unitOfWork.Tasks.Create(item);
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Task created in Task Board '{taskBoard.Title}' successfully"));
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpGet("/project/gettask/{id}")]
+        public JsonResult GetTask(string id)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Json(new { statusCode = 400, msg = "Please provide a valid Id" });
+            }
+
+            var task = _unitOfWork.Tasks.GetById(new Guid(id));
+            if (task == null || task.TaskBoard.Project.ProjectCode != code)
+            {
+                return Json(new { statusCode = 404, msg = "Task was not found" });
+            }
+
+            return Json(new { statusCode = 200, item = _mapper.Map<EditTaskVM>(task) });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult SaveSort(List<string> sortId)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            for (int i = 1; i <= sortId.Count; i++)
+            {
+                var task = _unitOfWork.Tasks.GetById(new Guid(sortId[i - 1]));
+                if (task != null && task.TaskBoard.Project.ProjectCode == code)
+                {
+                    task.Sort = i;
+                    _unitOfWork.Tasks.Update(task);
+                }
+            }
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult SetTaskStatus(string id, AppTaskStatus status)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Json(new { statusCode = 400, msg = "Please provide a valid Id" });
+            }
+
+            var item = _unitOfWork.Tasks.GetById(new Guid(id));
+            if (item == null || item.TaskBoard.Project.ProjectCode != code)
+            {
+                return Json(new { statusCode = 404, msg = "Task was not found" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User was not found" });
+            }
+
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project was not found" });
+            }
+
+            item.Status = status;
+            item.ModifiedAt = DateTime.UtcNow;
+            item.ModifiedBy = member.Member.FullName;
+
+            if (item.Status == AppTaskStatus.Completed)
+            {
+                item.CompletedAt = DateTime.UtcNow;
+                item.CompletedBy = member.Member.FullName;
+            }
+
+            _unitOfWork.Tasks.Update(item);
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Status has been changed for the task '{item.Title}' in Task Board {item.TaskBoard.Title}"));
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult EditTask(EditTaskVM model)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage).ToList();
+                return Json(new { statusCode = 400, msg = errors[0] });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (member == null)
+            {
+                return Json(new { statsuCode = 404, msg = "User was not found" });
+            }
+
+            var task = _unitOfWork.Tasks.GetById(model.Id);
+            if (task == null || task.TaskBoard.Project.ProjectCode != code)
+            {
+                return Json(new { statusCode = 404, msg = "Task was not found" });
+            }
+
+            var map = _mapper.Map(model, task);
+            _unitOfWork.Tasks.Update(map);
+            _unitOfWork.Projects.Log(new ProjectLog(member.ProjectId, member.Member.FullName,
+                member.MemberType, $"Task '{task.Title}' in '{task.TaskBoard.Title}' was modified successfully"));
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost("/project/deletetask/{id}")]
+        [ValidateAntiForgeryToken]
+        public JsonResult DeleteTask(string id)
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return Json(new { statusCode = 400, msg = "Please provide a valid Id" });
+            }
+
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project was not found" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "User not found" });
+            }
+
+            var task = _unitOfWork.Tasks.GetById(new Guid(id));
+            if (task == null || task.TaskBoard.Project.ProjectCode != code)
+            {
+                return Json(new { statusCode = 404, msg = "Task was not found" });
+            }
+
+            _unitOfWork.Tasks.Delete(task.Id);
+            _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
+                member.MemberType, $"Task '{task.Title}' in '{task.TaskBoard.Title}' was deleted successfully"));
+
+            return Json(new { statusCode = 200 });
         }
 
         [HttpPost]
@@ -249,7 +481,7 @@ namespace Flowdash_Mini.Controllers
             }
 
             var taskBoard = _unitOfWork.TaskBoards.GetById(new Guid(id));
-            if (taskBoard == null)
+            if (taskBoard == null || taskBoard.Project.ProjectCode != code)
             {
                 return Json(new { statusCode = 400, msg = "Task Board was not found" });
             }
@@ -280,7 +512,7 @@ namespace Flowdash_Mini.Controllers
             }
 
             var taskBoard = _unitOfWork.TaskBoards.GetById(new Guid(id));
-            if (taskBoard == null)
+            if (taskBoard == null || taskBoard.Project.ProjectCode != code)
             {
                 return Json(new { statusCode = 400, msg = "Task Board was not found" });
             }
@@ -305,7 +537,7 @@ namespace Flowdash_Mini.Controllers
             }
 
             var taskBoard = _unitOfWork.TaskBoards.GetById(model.Id);
-            if (taskBoard == null)
+            if (taskBoard == null || taskBoard.Project.ProjectCode != code)
             {
                 return Json(new { statusCode = 400, msg = "Task board was not found" });
             }
@@ -350,13 +582,15 @@ namespace Flowdash_Mini.Controllers
         [HttpGet("/project/editmember/{id}")]
         public IActionResult EditMember(string id)
         {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
             if (ViewBag.MemberType != MemberType.Owner)
             {
                 return Redirect("/project/members");
             }
 
             var item = _unitOfWork.Members.GetById(new Guid(id));
-            if (item == null || item.MemberType == MemberType.Owner)
+            if (item == null || item.MemberType == MemberType.Owner
+                || item.Project.ProjectCode != code)
             {
                 return Redirect("/project/members");
             }
@@ -381,7 +615,7 @@ namespace Flowdash_Mini.Controllers
             }
 
             var item = _unitOfWork.Members.GetById(model.Id);
-            if (item == null)
+            if (item == null || item.Project.ProjectCode != code)
             {
                 ModelState.AddModelError(string.Empty, "Requested Member was not found");
                 return View(model);
@@ -424,7 +658,7 @@ namespace Flowdash_Mini.Controllers
             }
 
             var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
-            if (member == null)
+            if (member == null || member.Project.ProjectCode != code)
             {
                 return Json(new { statusCode = 404, msg = "User not found" });
             }
@@ -482,6 +716,11 @@ namespace Flowdash_Mini.Controllers
         [HttpGet]
         public IActionResult Manage()
         {
+            if (ViewBag.MemberType != MemberType.Owner)
+            {
+                return Redirect("/project/members");
+            }
+
             var code = CookieHandler.Get(CookieName, HttpContext)!;
             var project = _unitOfWork.Projects.GetByCode(code)!;
 
@@ -495,6 +734,11 @@ namespace Flowdash_Mini.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Manage(EditProjectVM model)
         {
+            if (ViewBag.MemberType != MemberType.Owner)
+            {
+                return Redirect("/project/members");
+            }
+
             var members = _unitOfWork.Members.GetAllByProjectId(model.Id).ToList();
             ViewBag.Members = _mapper.Map<List<ProjectMemberVM>>(members);
 

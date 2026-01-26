@@ -36,4 +36,18 @@
             }
         });
     });
+
+    $(document).on('click', '[name="logout"]', function () {
+        Swal.fire({
+            title: "Sign Out",
+            text: 'You will be signed out from this account, are you sure you want to sign out?',
+            showCancelButton: true,
+            confirmButtonText: "Yes, Sign Out",
+            icon: 'question',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/auth/logout"
+            }
+        });
+    })
 })()

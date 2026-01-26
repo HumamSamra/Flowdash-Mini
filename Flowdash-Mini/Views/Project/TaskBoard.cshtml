@@ -5,15 +5,20 @@
 *@
 @{
     ViewData["Title"] = "Task Board";
+    string tbName = ViewBag.TaskBoardName;
 }
 @model List<TaskVM>
+
 @section Styles {
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/summernote/summernote-lite.min.css" />
 }
 
+@Html.AntiForgeryToken()
+
 <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <form class="modal-content">
+        <form class="modal-content ajax-form" method="POST" action="/project/createtask">
+            <input value="@ViewBag.TaskBoardId" name="TaskBoardId" hidden />
             <div class="modal-header d-flex justify-content-between align-items-center">
                 <h5 class="modal-title" id="exampleModalLabel1">Create new Task</h5>
                 <button class="clean-btn fs-20"
@@ -26,29 +31,87 @@
                 <div class="row">
                     <div class="col mb-3">
                         <label for="nameBasic" class="form-label">Task Title</label>
-                        <input type="text" id="nameBasic" class="form-control" placeholder="Enter Title" />
+                        <input type="text" id="nameBasic" name="Title" class="form-control" placeholder="Enter Title" />
                     </div>
                 </div>
-                <div class="row g-2">
+                <div class="row g-2 mb-3">
                     <div class="col mb-0">
                         <label for="descBasic" class="form-label">Description (optional)</label>
-                        <textarea class="summernote" id="descBasic" placeholder="Enter Description..."></textarea>
+                        <textarea class="summernote" id="descBasic" name="Description" placeholder="Enter Description..."></textarea>
                     </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col mb-0">
+                        <label for="basic-slct">Select Status</label>
+                        <select class="form-select" id="basic-slct"
+                                asp-items="Html.GetEnumSelectList<AppTaskStatus>()" name="Status">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="error-area">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     Close
                 </button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form class="modal-content ajax-form" id="edit-form" method="POST" action="/project/edittask">
+            <input name="Id" hidden />
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title" id="exampleModalLabel1">Edit Task</h5>
+                <button class="clean-btn fs-20"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <i class="bx bx-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col mb-3">
+                        <label for="nameBasic" class="form-label">Task Title</label>
+                        <input type="text" id="nameBasic" name="Title" class="form-control" placeholder="Enter Title" />
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col mb-0">
+                        <label for="descBasic" class="form-label">Description (optional)</label>
+                        <textarea class="summernote" id="descBasic" name="Description" placeholder="Enter Description..."></textarea>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col mb-0">
+                        <label for="basic-slct">Select Status</label>
+                        <select class="form-select" id="basic-slct"
+                                asp-items="Html.GetEnumSelectList<AppTaskStatus>()" name="Status">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="error-area">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="flex-grow-1">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold py-3 mb-0"><a href="/project" class="text-muted fw-light">Project /</a> Task Board</h4>
+        <h4 class="fw-bold py-3 mb-0"><a href="/project" class="text-muted fw-light">Project /</a> <a href="/project/progress" class="text-muted fw-light">Progress /</a> Task Board '@tbName'</h4>
         <div class="d-flex gap-3 align-items-center justify-content-center">
             <button id="create-task-modal" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
                 <i class="bx bx-envelope"></i> <span>Add Task</span>
@@ -63,90 +126,119 @@
     <div class="card">
         <div class="card-body">
             <h5>In Progress Tasks</h5>
-            <div class="demo-inline-spacing mt-3">
-                <div class="list-group">
-                    @foreach (var item in Model.Where(e => e.Status == AppTaskStatus.Completed))
-                    {
-                        <div href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start p-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="fs-20 bx bx-menu handle"></i>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between w-100">
-                                        <h6>@item.Title</h6>
-                                        <div class="dropdown">
-                                            <button class="btn p-0" type="button" id="orederStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <i class="bx bx-dots-vertical-rounded"></i>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
-                                                <a class="dropdown-item d-flex gap-2 align-items-center" href="javascript:void(0);">
-                                                    <i class="bx bx-edit"></i>
-                                                    <span>Edit Task</span>
-                                                </a>
-                                                <a class="dropdown-item d-flex gap-2 align-items-center text-danger" href="javascript:void(0);">
-                                                    <i class="bx bx-trash"></i>
-                                                    <span>Delete Task</span>
-                                                </a>
+            <form method="post" action="/project/savesort" id="sort-form" class="refresh-never demo-inline-spacing mt-3 ajax-form">
+                @if (Model.Where(e => e.Status == AppTaskStatus.InProgress).Count() > 0)
+                {
+                    <div class="list-group">
+                        @foreach (var item in Model.Where(
+                                            e => e.Status == AppTaskStatus.InProgress)
+                                            .OrderBy(e => e.Sort))
+                        {
+                            <div href="javascript:void(0);"
+                                 class="list-group-item list-group-item-action flex-column align-items-start p-3">
+                                <input name="sortId" value="@item.Id" hidden />
+                                <div class="d-flex align-items-center gap-3">
+                                    <i class="fs-20 bx bx-menu handle"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between w-100">
+                                            <h6>@item.Title</h6>
+                                            <div class="dropdown">
+                                                <button class="btn p-0" type="button" id="orederStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
+                                                    <a name="edit-task" id="@item.Id" class="dropdown-item d-flex gap-2 align-items-center" href="javascript:void(0);">
+                                                        <i class="bx bx-edit"></i>
+                                                        <span>Edit Task</span>
+                                                    </a>
+                                                    <a name="delete-task" id="@item.Id" class="dropdown-item d-flex gap-2 align-items-center text-danger" href="javascript:void(0);">
+                                                        <i class="bx bx-trash"></i>
+                                                        <span>Delete Task</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="mb-1">
+                                            @Html.Raw(item.Description)
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small>@item.CreatedAt.ToString("dd MMM, yyyy hh:mm tt") by @item.CreatedBy</small>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button name="setstatus" id="@item.Id"
+                                                        statusId="@AppTaskStatus.Completed" class="btn btn-success btn-sm">
+                                                    Done
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
-                                    <p class="mb-1">
-                                        @Html.Raw(item.Description)
-                                    </p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small>@item.CreatedAt.ToString("dd MMM, yyyy hh:mm tt")</small>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <button class="btn btn-success btn-sm">
-                                                Done
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
-            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex align-items-center gap-2 text-muted">
+                        <i class='bx  bx-wind'></i>
+                        <span>It's really quiet in here..</span>
+                    </div>
+                }
+
+            </form>
 
             <h5 class="mt-4">Completed Tasks</h5>
             <div class="demo-inline-spacing mt-3">
-                <div class="list-group">
-                    @foreach (var item in Model.Where(e => e.Status == AppTaskStatus.InProgress))
-                    {
-                        <div href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start p-3">
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="text-decoration-line-through">@item.Title</h6>
-                                <div class="dropdown">
-                                    <button class="btn p-0" type="button" id="orederStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
-                                        <a class="dropdown-item d-flex gap-2 align-items-center" href="javascript:void(0);">
-                                            <i class="bx bx-edit"></i>
-                                            <span>Edit Task</span>
-                                        </a>
-                                        <a class="dropdown-item d-flex gap-2 align-items-center text-danger" href="javascript:void(0);">
-                                            <i class="bx bx-trash"></i>
-                                            <span>Delete Task</span>
-                                        </a>
+                @if (Model.Where(e => e.Status == AppTaskStatus.Completed).Count() > 0)
+                {
+                    <div class="list-group">
+                        @foreach (var item in Model.Where(
+                                            e => e.Status == AppTaskStatus.Completed)
+                                            .OrderBy(e => e.Sort))
+                        {
+                            <div href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start p-3">
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="text-decoration-line-through">@item.Title</h6>
+                                    <div class="dropdown">
+                                        <button class="btn p-0" type="button" id="orederStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
+                                            <a name="edit-task" id="@item.Id" class="dropdown-item d-flex gap-2 align-items-center" href="javascript:void(0);">
+                                                <i class="bx bx-edit"></i>
+                                                <span>Edit Task</span>
+                                            </a>
+                                            <a name="delete-task" id="@item.Id" class="dropdown-item d-flex gap-2 align-items-center text-danger" href="javascript:void(0);">
+                                                <i class="bx bx-trash"></i>
+                                                <span>Delete Task</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="mb-1 text-decoration-line-through">
+                                    @Html.Raw(item.Description)
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small>Completed on @item.CompletedAt.ToString("dd MMM, yyyy hh:mm tt") by @item.CompletedBy</small>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button name="setstatus" id="@item.Id"
+                                                statusId="@AppTaskStatus.InProgress" class="btn btn-danger btn-sm">
+                                            In Progress
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <p class="mb-1 text-decoration-line-through">
-                                @Html.Raw(item.Description)
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small>Completed on @item.CompletedAt.ToString("dd MMM, yyyy hh:mm tt") by @item.CompletedBy</small>
-                                <div class="d-flex align-items-center gap-2">
-                                    <button class="btn btn-danger btn-sm">
-                                        In Progress
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex align-items-center gap-2 text-muted">
+                        <i class='bx  bx-wind'></i>
+                        <span>It's really quiet in here..</span>
+                    </div>
+                }
 
+            </div>
         </div>
     </div>
     <!--/ Advance Styling Options -->
@@ -165,6 +257,9 @@
             $('.list-group').each(function (index, element) {
                 new Sortable(element, {
                     handle: '.handle',
+                    onEnd: function () {
+                        $('#sort-form').submit()
+                    },
                     animation: 150
                 });
             })
@@ -181,6 +276,137 @@
                 ],
                 disableDragAndDrop: true
             });
+
+            $('a[name="edit-task"]').on('click', function (ev) {
+                let id = $(this).attr('id')
+
+                $.ajax({
+                    url: '/project/gettask/' + id,
+                    method: 'get',
+                    success: function (result) {
+                        if (result.statusCode == 200) {
+                            $('#edit-form')
+                            .find('input[name="Id"]')
+                            .val(result.item.id)
+
+                            $('#edit-form')
+                            .find('input[name="Title"]')
+                            .val(result.item.title)
+
+                            $('#edit-form')
+                            .find('#descBasic')
+                            .summernote('code', result.item.description);
+
+                            $('#edit-form')
+                            .find('#basic-slct')
+                            .val(result.item.status)
+
+                            $("#editModal").modal('show')
+                        } else{
+                            Swal.fire({
+                                icon: "error",
+                                title: 'Oops..',
+                                text: result.msg ?? "An error occurred while processing your request"
+                            })
+                        }
+                    }
+                })
+            })
+
+            $(document)
+            .on('click', 'a[name="delete-task"]', function (e) {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This task will be deleted forever",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/project/deletetask/' + $(this).attr('id'),
+                            method: 'post',
+                            headers: {
+                                'RequestVerificationToken':
+                                    $('input[name="__RequestVerificationToken"]').val()
+                            },
+                        }).fail(xhr => {
+                            Swal.fire({
+                                title: "Oops..",
+                                text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                icon: "error"
+                            });
+                        }).done((result) => {
+                            if(result.statusCode == 200) {
+                                Swal.fire({
+                                    title: "Done!",
+                                    text: "Task Deleted Successfully!",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: result.msg || "An error occurred...",
+                                    icon: "error"
+                                })
+                            }
+                        })
+                    }
+                });
+            })
+            .on('submit', '.ajax-form', function (e) {
+                e.preventDefault()
+                let $form = $(this);
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: $(this).attr('method'),
+                    data: $(this).serialize(),
+                    headers: {
+                        'RequestVerificationToken':
+                            $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.statusCode == 200) {
+                            if ($form.hasClass('refresh-never')) {
+                                return
+                            }
+
+                            window.location.reload(true)
+                        } else {
+                            $(this)
+                            .find('.error-area')
+                            .html(`<span class="text-danger my-2">${result.msg}</span>`)
+                        }
+                    }
+                })
+            })
+            .on('click', 'button[name="setstatus"]', function(e) {
+                $.ajax({
+                    url: '/project/settaskstatus',
+                    method: 'POST',
+                    data: {
+                        id: $(this).attr('id'),
+                        status: $(this).attr('statusId')
+                    },
+                    headers: {
+                        'RequestVerificationToken':
+                            $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.statusCode == 200) {
+                            Swal.fire('Status Updated', 'Please refresh to see changes', 'success')
+                            .then(() => window.location.reload(true))
+                        } else {
+                            Swal.fire('Oops..',
+                                result.msg ?? 'Error occurred while processing your request',
+                                'error')
+                        }
+                    }
+                })
+            })
         });
     </script>
 }

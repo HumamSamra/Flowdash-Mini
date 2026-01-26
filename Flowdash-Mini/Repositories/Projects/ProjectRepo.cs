@@ -42,6 +42,7 @@ namespace Flowdash_Mini.Repositories.Projects
         public Project? GetByCode(string code)
             => _context.Projects
             .Include(e => e.Members)
+            .Include(e => e.TaskBoards)
             .FirstOrDefault(p => p.ProjectCode == code);
 
         public void Update(Project modifiedItem)

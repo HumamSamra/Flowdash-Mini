@@ -71,6 +71,28 @@
     <script>
         $(function () {
             $('#my-acc-mbtn').addClass('active')
+
+            var proceed = false;
+            var originalEmail = '@Model.Email'
+            $('#formAccountSettings').on('submit', function(ev) {
+                if (!proceed && $('input#email').val().toLowerCase().trim() != originalEmail.toLowerCase().trim()) {
+                    ev.preventDefault()
+                    if ($('input#email').val().toLowerCase().trim() != originalEmail.toLowerCase().trim()) {
+                        Swal.fire({
+                            title: "Sign Out",
+                            text: 'You will be signed out from this account to re-confirm your new email, are you sure you want to continue?',
+                            showCancelButton: true,
+                            confirmButtonText: "Yes, Sign Out",
+                            icon: 'question',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                proceed = true
+                                $(this).submit()
+                            }
+                        });
+                    }
+                }
+            })
         })
     </script>
 }

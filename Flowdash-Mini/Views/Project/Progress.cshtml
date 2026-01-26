@@ -87,12 +87,9 @@
     <div class="d-flex justify-content-between align-items-center">
         <h4 class="fw-bold py-3 mb-4"><a href="/project" class="text-muted fw-light">Project /</a> Progress</h4>
         <div class="d-flex gap-3 align-items-center justify-content-center">
-            @if (ViewBag.MemberType != MemberType.User)
-            {
-                <a href="javascript:void(0);" id="create-task" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
-                    <i class="bx bx-plus"></i> <span>Create Task Board</span>
-                </a>
-            }
+            <a href="javascript:void(0);" id="create-task" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                <i class="bx bx-plus"></i> <span>Create Task Board</span>
+            </a>
             <a href="javascript:void(0);" class="refresh-btn btn btn-outline-secondary d-flex justify-content-center align-items-center gap-2">
                 <i class="bx bx-refresh-cw"></i> <span>Refresh</span>
             </a>
@@ -141,13 +138,13 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h6 class="mb-2">Task Board Progress:</h6>
                                         <span class="text-muted">
-                                            @item.Tasks.Where(e => e.Status == AppTaskStatus.InProgress).Count() / @item.Tasks.Count
+                                            @item.Tasks.Where(e => e.Status == AppTaskStatus.Completed).Count() / @item.Tasks.Count
                                         </span>
                                     </div>
                                     <div class="progress mb-3">
                                         @{
                                             var total = item.Tasks.Count();
-                                            var inProgress = item.Tasks.Count(e => e.Status == AppTaskStatus.InProgress);
+                                            var inProgress = item.Tasks.Count(e => e.Status == AppTaskStatus.Completed);
                                             var percent = total == 0 ? 0 : (inProgress * 100 / total);
                                         }
 

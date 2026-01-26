@@ -31,7 +31,7 @@
             </a>
         </li>
 
-        @if (User.IsInRole(nameof(UserType.Admin)))
+        @if (User.IsInRole(nameof(UserType.Admin)) && ViewBag.MemberType == null)
         {
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Security</span>
@@ -100,9 +100,7 @@
 
             if (ViewBag.MemberType == MemberType.Owner || ViewBag.MemberType == MemberType.Admin)
             {
-                <!-- Forms & Tables -->
                 <li class="menu-header small text-uppercase"><span class="menu-header-text">Actions</span></li>
-                <!-- Forms -->
                 <li class="menu-item" id="activity-mbtn">
                     <a href="/project/activity"
                        class="menu-link">
@@ -110,14 +108,28 @@
                         <div data-i18n="Documentation">Activity Log</div>
                     </a>
                 </li>
-                <!-- Forms & Tables -->
+            }
+
+            if (ViewBag.MemberType == MemberType.Owner)
+            {
                 <li class="menu-header small text-uppercase"><span class="menu-header-text">Settings</span></li>
-                <!-- Forms -->
                 <li class="menu-item" id="manage-mbtn">
                     <a href="/project/manage"
                        class="menu-link">
                         <i class="menu-icon tf-icons bx bx-cog"></i>
                         <div data-i18n="Documentation">Manage</div>
+                    </a>
+                </li>
+            }
+
+            if (ViewBag.MemberType != MemberType.Owner)
+            {
+                <li class="menu-header small text-uppercase"><span class="menu-header-text">Settings</span></li>
+                <li class="menu-item" id="manage-mbtn">
+                    <a href="/project/manage"
+                       class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-cog"></i>
+                        <div data-i18n="Documentation">Manage Membership</div>
                     </a>
                 </li>
             }
@@ -154,9 +166,16 @@
                     <div>Security</div>
                 </a>
             </li>
+            <li class="menu-item" name="logout" id="sec-mbtn">
+                <a href="javascript:void(0);"
+                   class="menu-link text-danger">
+                    <i class="menu-icon tf-icons bx bx-power"></i>
+                    <div>Logout</div>
+                </a>
+            </li>
         }
 
-        @if (User.IsInRole(nameof(UserType.Admin)))
+        @if (User.IsInRole(nameof(UserType.Admin)) && ViewBag.MemberType == null)
         {
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Admin Settings</span></li>
             <li class="menu-item" id="settings-mbtn">

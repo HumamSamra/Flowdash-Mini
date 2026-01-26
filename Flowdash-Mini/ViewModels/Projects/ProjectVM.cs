@@ -1,6 +1,7 @@
 ﻿using Flowdash_Mini.Classes;
 using Flowdash_Mini.Enums;
 using Flowdash_Mini.ViewModels.Members;
+using Flowdash_Mini.ViewModels.TaskBoards;
 using System.ComponentModel.DataAnnotations;
 
 namespace Flowdash_Mini.ViewModels.Projects
@@ -29,6 +30,7 @@ namespace Flowdash_Mini.ViewModels.Projects
         public ProjectState State { get; set; } = ProjectState.Personal;
 
         public ICollection<ProjectMemberVM> Members { get; set; } = new List<ProjectMemberVM>();
+        public ICollection<TaskBoardVM> TaskBoards { get; set; } = new List<TaskBoardVM>();
 
         public string CreatedBy { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
