@@ -103,7 +103,7 @@ namespace Flowdash_Mini.Context
             await userManager.CreateAsync(user, password: "Usr123456");
             await userManager.AddToRolesAsync(user,
                 new List<string>() {nameof(UserType.Migration),
-                nameof(UserType.User)});
+                nameof(UserType.User), nameof(UserType.System)});
 
             var admin = new AppUser()
             {
@@ -121,7 +121,8 @@ namespace Flowdash_Mini.Context
             var result = await userManager.AddToRolesAsync(admin,
                 new List<string>() {nameof(UserType.Migration),
                 nameof(UserType.User),
-                nameof(UserType.Admin)});
+                nameof(UserType.Admin),
+                nameof(UserType.System)});
         }
     }
 }

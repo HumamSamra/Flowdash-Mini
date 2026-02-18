@@ -1,9 +1,12 @@
 ﻿@using Flowdash_Mini.Extensions
+@using Flowdash_Mini.ViewModels.Views
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
 }
+@model HeaderVM
+
 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
      id="layout-navbar">
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
@@ -82,7 +85,13 @@
                 <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar flex-shrink-0">
                         <span class="rounded-circle avatar-initial rounded bg-label-secondary fs-20">
-                            <i class="bx bx-bell"></i>
+                            <span class="position-relative d-flex justify-content-center align-items-center">
+                                <span id="notification-badge" class="d-none position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                    <span class="visually-hidden">New alerts</span>
+                                </span>
+
+                                <i class="bx bx-bell p-1"></i>
+                            </span>
                         </span>
                     </div>
                 </a>
@@ -96,84 +105,42 @@
                             <a href="/notifications">View all</a>
                         </div>
                     </li>
-                    <ul class="p-2 m-0 pt-0">
-                        <li class="d-flex mb-2 pb-1 bg-hover-light rounded-3 p-2">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-secondary fs-20">
-                                    <i class="bx  bx-help-circle"></i>
-                                </span>
-                            </div>
-                            <div class="d-flex flex-column w-100 align-items-start justify-content-center gap-2 text-truncate">
+                    @if (Model.Notifications.Count > 0)
+                    {
+                        <ul class="p-2 m-0 pt-0 last-child-m0">
+                            @foreach (var item in Model.Notifications)
+                            {
+                                <li class="d-flex mb-2 pb-1 bg-hover-light rounded-3 p-2">
+                                    <div class="avatar flex-shrink-0 me-3">
+                                        <span class="avatar-initial rounded bg-label-secondary fs-20">
+                                            <i class="bx  bx-help-circle"></i>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex flex-column w-100 align-items-start justify-content-center gap-2 text-truncate">
 
-                                <h6 class="mb-0 w-100">
-                                    <a href="#!" class="text-nowrap overflow-hidden w-100 d-block text-overflow-ellipses" title="Task (xd94FQxT) was completed by (Humam Samra)">
-                                        Task (xd94FQxT) was completed by (Humam Samra)
-                                    </a>
-                                </h6>
-                                <div class="user-progress d-flex align-items-center gap-1">
-                                    <i class="text-muted bx bx-calendar"></i>
-                                    <h6 class="mb-0 text-muted">19 Aug, 2026</h6>
-                                </div>
+                                        <h6 class="mb-0 w-100">
+                                            <a class="text-nowrap overflow-hidden w-100 d-block text-overflow-ellipses" title="Task (xd94FQxT) was completed by (Humam Samra)">
+                                                @item.Text
+                                            </a>
+                                        </h6>
+                                        <div class="user-progress d-flex align-items-center gap-1">
+                                            <i class="text-muted bx bx-calendar"></i>
+                                            <h6 class="mb-0 text-muted">@item.CreatedAt.ToString("dd MMM, yyyy hh:mm tt")</h6>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <li class="p-3 pt-0">
+                            <div class="d-flex align-items-center text-muted gap-2">
+                                <i class="bx bx-wind"></i>
+                                <span>it's really empty here</span>
                             </div>
                         </li>
-                        <li class="d-flex mb-2 pb-1 bg-hover-light rounded-3 p-2">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-success fs-20">
-                                    <i class="bx  bx-check-circle"></i>
-                                </span>
-                            </div>
-                            <div class="d-flex flex-column w-100 align-items-start justify-content-center gap-2 text-truncate">
-
-                                <h6 class="mb-0 w-100">
-                                    <a href="#!" class="text-nowrap overflow-hidden w-100 d-block text-overflow-ellipses" title="Task (xd94FQxT) was completed by (Humam Samra)">
-                                        Task (xd94FQxT) was completed by (Humam Samra)
-                                    </a>
-                                </h6>
-                                <div class="user-progress d-flex align-items-center gap-1">
-                                    <i class="text-muted bx bx-calendar"></i>
-                                    <h6 class="mb-0 text-muted">19 Aug, 2026</h6>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="d-flex mb-2 pb-1 bg-hover-light rounded-3 p-2">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-danger fs-20">
-                                    <i class="bx  bx-alert-circle"></i>
-                                </span>
-                            </div>
-                            <div class="d-flex flex-column w-100 align-items-start justify-content-center gap-2 text-truncate">
-
-                                <h6 class="mb-0 w-100">
-                                    <a href="#!" class="text-nowrap overflow-hidden w-100 d-block text-overflow-ellipses" title="Task (xd94FQxT) was completed by (Humam Samra)">
-                                        Task (xd94FQxT) was completed by (Humam Samra)
-                                    </a>
-                                </h6>
-                                <div class="user-progress d-flex align-items-center gap-1">
-                                    <i class="text-muted bx bx-calendar"></i>
-                                    <h6 class="mb-0 text-muted">19 Aug, 2026</h6>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="d-flex pb-1 bg-hover-light rounded-3 p-2">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-success fs-20">
-                                    <i class="bx  bx-check-circle"></i>
-                                </span>
-                            </div>
-                            <div class="d-flex flex-column w-100 align-items-start justify-content-center gap-2 text-truncate">
-
-                                <h6 class="mb-0 w-100">
-                                    <a href="#!" class="text-nowrap overflow-hidden w-100 d-block text-overflow-ellipses" title="Task (xd94FQxT) was completed by (Humam Samra)">
-                                        Task (xd94FQxT) was completed by (Humam Samra)
-                                    </a>
-                                </h6>
-                                <div class="user-progress d-flex align-items-center gap-1">
-                                    <i class="text-muted bx bx-calendar"></i>
-                                    <h6 class="mb-0 text-muted">19 Aug, 2026</h6>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
+                    }
                 </ul>
             </li>
 
@@ -237,3 +204,36 @@
         </ul>
     </div>
 </nav>
+
+<script defer>
+    $(document).ready(function() {
+        var latestNoti = '@(Model.Notifications?.FirstOrDefault()?.Id)';
+        var userId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+
+        if (!latestNoti || !userId) return;
+
+        var storageKey = 'LAST_NOTI_ID_USER_' + userId;
+        var storedNoti = localStorage.getItem(storageKey);
+
+        // Show badge if user hasn't seen latest notification
+        if (!storedNoti || storedNoti !== latestNoti) {
+            $('#notification-badge').removeClass('d-none');
+        }
+
+        // When user opens notifications → mark as seen
+        $('#notification-btn').on('click', function() {
+            localStorage.setItem(storageKey, latestNoti);
+            $('#notification-badge').addClass('d-none');
+        });
+
+        $('.notifications-dropdown')
+            .closest('.dropdown')
+            .on('shown.bs.dropdown', function() {
+
+                localStorage.setItem(storageKey, latestNoti);
+                $('#notification-badge').addClass('d-none');
+
+            });
+
+    });
+</script>

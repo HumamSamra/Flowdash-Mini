@@ -23,6 +23,8 @@ namespace Flowdash_Mini.Context
         public DbSet<ProjectInvite> ProjectInvites { get; set; }
         public DbSet<ProjectLog> ProjectLogs { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
+
         public DbSet<AppTaskBoard> AppTaskBoards { get; set; }
         public DbSet<AppTask> AppTasks { get; set; }
 

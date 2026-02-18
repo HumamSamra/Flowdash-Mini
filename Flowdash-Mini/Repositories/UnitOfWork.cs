@@ -1,7 +1,9 @@
 ﻿using Flowdash_Mini.Context;
 using Flowdash_Mini.Repositories.Announcements;
 using Flowdash_Mini.Repositories.AppSettings;
+using Flowdash_Mini.Repositories.JoinRequests;
 using Flowdash_Mini.Repositories.Members;
+using Flowdash_Mini.Repositories.Notifications;
 using Flowdash_Mini.Repositories.Projects;
 using Flowdash_Mini.Repositories.TaskBoards;
 using Flowdash_Mini.Repositories.Tasks;
@@ -33,5 +35,11 @@ namespace Flowdash_Mini.Repositories
 
         public IAnnouncementRepo Announcements
             => new AnnouncementRepo(_context);
+
+        public INotificationRepo Notifications
+            => new NotificationRepo(_context);
+
+        public IJoinRequestRepo JoinRequests
+            => new JoinRequestRepo(_context);
     }
 }

@@ -12,5 +12,8 @@ namespace Flowdash_Mini.Enums
 
         [Display(Name = "Admin")]
         Admin = 2,
+
+        [Display(Name = "System")]
+        System = 4,
     }
 }

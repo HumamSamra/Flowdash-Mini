@@ -8,6 +8,7 @@ using Flowdash_Mini.Models.Projects;
 using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
 using Flowdash_Mini.ViewModels.Accounts;
+using Flowdash_Mini.ViewModels.Notifications;
 using Flowdash_Mini.ViewModels.Projects;
 using Flowdash_Mini.ViewModels.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -63,7 +64,11 @@ namespace Flowdash_Mini.Controllers
         [HttpGet("/Notifications")]
         public IActionResult Notifications()
         {
-            return View();
+            var notifications = _unitOfWork.Notifications.GetAll(User.GetUserId())
+                .OrderByDescending(e => e.CreatedAt)
+                .ToList();
+            var list = _mapper.Map<List<NotificationVM>>(notifications);
+            return View(list);
         }
 
         [HttpGet("/Invites")]
@@ -148,7 +153,6 @@ namespace Flowdash_Mini.Controllers
             map.ModifiedBy = User.GetUserName();
             map.ModifiedAt = DateTime.UtcNow;
 
-
             var result = await _userManager.UpdateAsync(map);
             if (!result.Succeeded)
             {
@@ -166,6 +170,8 @@ namespace Flowdash_Mini.Controllers
                 return Redirect("/auth/login?returnUrl=/myaccount");
             }
 
+            _unitOfWork.Notifications.PushNotification(
+                User.GetUserId(), "Your account information has been updated");
             ViewBag.Success = true;
 
             return View(model);
@@ -216,6 +222,8 @@ namespace Flowdash_Mini.Controllers
             project.Members.Add(member);
 
             _unitOfWork.Projects.Create(project);
+            _unitOfWork.Notifications.PushNotification(
+                User.GetUserId(), $"Project '{project.ProjectName}' has been created successfully");
 
             return RedirectToAction(nameof(Index));
         }
@@ -246,12 +254,35 @@ namespace Flowdash_Mini.Controllers
                 return Json(new { statusCode = 400, msg = "You are already a member in this project" });
             }
 
+            var userId = User.GetUserId();
             if (project.State == ProjectState.Personal)
             {
                 return Json(new { statusCode = 400, msg = "Sorry you can't join this project because it's personal" });
             }
             else if (project.State == ProjectState.Private)
             {
+                if (_unitOfWork.Projects.JoinRequestExists(userId, project.Id))
+                {
+                    return Json(new
+                    {
+                        statusCode = 400,
+                        msg = "You have already sent a join request, please wait until you get approved!"
+                    });
+                }
+
+                var request = new ProjectJoinRequest(userId, project.Id);
+                _unitOfWork.Projects.CreateProjectJoinRequest(request);
+
+                _unitOfWork.Notifications.PushNotification(
+                    User.GetUserId(), $"Join request has been sent to project '{project.ProjectName}' successfully");
+
+                var user = _userManager.Users.FirstOrDefault(e => e.Id == userId);
+                var owner = project.Members.FirstOrDefault(e => e.MemberType == MemberType.Owner);
+                if (owner != null && user != null)
+                {
+                    _unitOfWork.Notifications.PushNotification(
+                        owner.MemberId, $"{user.FullName} has requested to join the project '{project.ProjectName}'");
+                }
                 return Json(new { statusCode = 200, msg = "Join invitation has been sent successfully" });
             }
             else
@@ -260,6 +291,17 @@ namespace Flowdash_Mini.Controllers
                 member.MemberId = User.GetUserId();
                 project.Members.Add(member);
                 _unitOfWork.Projects.Update(project);
+
+                _unitOfWork.Notifications.PushNotification(
+                    User.GetUserId(), $"You are now a member of '{project.ProjectName}'");
+
+                var owner = project.Members.FirstOrDefault(e => e.MemberType == MemberType.Owner);
+                if (owner != null)
+                {
+                    _unitOfWork.Notifications.PushNotification(
+                        owner.MemberId, $"{member.Member.FullName} has joined the project '{project.ProjectName}'");
+                }
+
                 return Json(new { statusCode = 200 });
             }
         }

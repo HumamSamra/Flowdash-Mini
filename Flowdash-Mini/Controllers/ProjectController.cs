@@ -9,6 +9,7 @@ using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
 using Flowdash_Mini.ViewModels.Activities;
 using Flowdash_Mini.ViewModels.Announcements;
+using Flowdash_Mini.ViewModels.JoinRequests;
 using Flowdash_Mini.ViewModels.Members;
 using Flowdash_Mini.ViewModels.Projects;
 using Flowdash_Mini.ViewModels.TaskBoards;
@@ -93,17 +94,80 @@ namespace Flowdash_Mini.Controllers
         {
             if (ViewBag.MemberType != MemberType.Owner)
             {
-                return Json(new { statusCode = 403, msg = "ACCESS DENIED" });
+                return Redirect("/project");
             }
 
             var code = CookieHandler.Get(CookieName, HttpContext)!;
             var user = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
-            if (user == null || user.MemberType != MemberType.Admin
-                || user.MemberType != MemberType.Owner)
+            if (user == null || (user.MemberType != MemberType.Admin
+                && user.MemberType != MemberType.Owner))
             {
                 return Redirect("/project");
             }
-            return View();
+
+            var list = _unitOfWork.JoinRequests.GetAll(code)
+                .ToList();
+            return View(_mapper.Map<List<JoinRequestVM>>(list));
+        }
+
+        [HttpPost("/Project/AcceptRequest/{id}")]
+        public JsonResult AcceptRequest(string id)
+        {
+            var request = _unitOfWork.JoinRequests.Get(new Guid(id));
+            if (request == null)
+            {
+                return Json(new { statusCode = 404, msg = "Request not found" });
+            }
+
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var user = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (user == null || (user.MemberType != MemberType.Admin
+                && user.MemberType != MemberType.Owner))
+            {
+                return Json(new { statusCode = 403, msg = "Unauthorized action detected" });
+            }
+
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+            var member = new ProjectMember();
+            member.MemberId = request.UserId;
+            project.Members.Add(member);
+            _unitOfWork.Projects.Update(project);
+
+            _unitOfWork.JoinRequests.Delete(request.Id);
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost("/Project/RejectRequest/{id}")]
+        public JsonResult RejectRequest(string id)
+        {
+            var request = _unitOfWork.JoinRequests.Get(new Guid(id));
+            if (request == null)
+            {
+                return Json(new { statusCode = 404, msg = "Request not found" });
+            }
+
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var user = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (user == null || (user.MemberType != MemberType.Admin
+                && user.MemberType != MemberType.Owner))
+            {
+                return Json(new { statusCode = 403, msg = "Unauthorized action detected" });
+            }
+
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            _unitOfWork.JoinRequests.Delete(request.Id);
+
+            return Json(new { statusCode = 200 });
         }
 
         [HttpGet]
@@ -151,6 +215,15 @@ namespace Flowdash_Mini.Controllers
             _unitOfWork.Announcements.Create(item);
             _unitOfWork.Projects.Log(new ProjectLog(project.Id, member.Member.FullName,
                 member.MemberType, $"Announcement '{model.Text}' was posted successfully"));
+
+            foreach (var projMember in project.Members)
+            {
+                if (projMember.MemberId != User.GetUserId())
+                {
+                    _unitOfWork.Notifications.PushNotification(
+                        projMember.MemberId, $"{member.Member.FullName} has posted an announcement in '{project.ProjectName}'");
+                }
+            }
 
             return Json(new { statusCode = 200 });
         }
@@ -710,6 +783,12 @@ namespace Flowdash_Mini.Controllers
             _unitOfWork.Projects.Log(new ProjectLog(project.Id, owner.Member.FullName,
                 owner.MemberType, $"Ownership transferred from '{owner.Member.FullName}' to '{item.Member.FullName}'"));
 
+            foreach (var member in project.Members)
+            {
+                _unitOfWork.Notifications.PushNotification(
+                    member.MemberId, $"Project '{project.ProjectName}' ownership has been transferred to '{item.Member.FullName}'");
+            }
+
             return Json(new { statusCode = 200 });
         }
 
@@ -764,11 +843,9 @@ namespace Flowdash_Mini.Controllers
             project.Description = model.Description;
             project.Tags = model.Tags;
 
-            if (model.State == ProjectState.Personal ||
-                model.State == ProjectState.Private)
+            if (model.State == ProjectState.Personal)
             {
-                if (model.State == ProjectState.Personal &&
-                    project.Members.Count > 1)
+                if (project.Members.Count > 1)
                 {
                     ModelState.AddModelError(string.Empty, "Cannot change state to Personal when other members exist");
                     return View(model);

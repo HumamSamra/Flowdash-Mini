@@ -13,5 +13,18 @@ namespace Flowdash_Mini.Models.Projects
 
         public Guid ProjectId { get; set; }
         public Project Project { get; set; } = null!;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ProjectJoinRequest()
+        {
+
+        }
+
+        public ProjectJoinRequest(Guid userId, Guid projId)
+        {
+            UserId = userId;
+            ProjectId = projId;
+        }
     }
 }

@@ -96,9 +96,9 @@
                                                     <span class="badge bg-label-primary text-primary">User</span>
                                                 }
                                             </td>
-                                            @if (ViewBag.MemberType == MemberType.Owner)
-                                            {
-                                                <td class="text-center">
+                                            <td class="text-center">
+                                                @if (ViewBag.MemberType == MemberType.Owner)
+                                                {
                                                     @if (item.Member?.Id != User.GetUserId())
                                                     {
                                                         <div class="dropdown">
@@ -122,8 +122,8 @@
                                                             </div>
                                                         </div>
                                                     }
-                                                </td>
-                                            }
+                                                }
+                                            </td>
                                         </tr>
                                     }
 

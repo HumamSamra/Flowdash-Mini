@@ -78,5 +78,47 @@ namespace Flowdash_Mini.Repositories.Projects
                 .Where(l => l.ProjectId == projectId)
                 .AsQueryable();
         }
+
+        public IQueryable<ProjectJoinRequest> GetProjectJoinRequests(Guid projectId)
+        {
+            return _context.ProjectJoinRequests
+                .Include(e => e.User)
+                .Include(e => e.Project)
+                .Where(r => r.ProjectId == projectId)
+                .AsQueryable();
+        }
+
+        public IQueryable<ProjectJoinRequest> GetUserJoinRequests(Guid userId)
+        {
+            return _context.ProjectJoinRequests
+                .Include(e => e.User)
+                .Include(e => e.Project)
+                .Where(r => r.UserId == userId)
+                .AsQueryable();
+        }
+
+        public bool JoinRequestExists(Guid userId, Guid projId)
+        {
+            return _context.ProjectJoinRequests
+                .Any(r => r.UserId == userId && r.ProjectId == projId);
+        }
+
+        public void CreateProjectJoinRequest(ProjectJoinRequest item)
+        {
+            item.CreatedAt = DateTime.UtcNow;
+            _context.ProjectJoinRequests.Add(item);
+            _context.SaveChanges();
+        }
+
+        public void DeleteProjectJoinRequest(Guid id)
+        {
+            var item = _context.ProjectJoinRequests
+                .FirstOrDefault(e => e.Id == id);
+            if (item != null)
+            {
+                _context.ProjectJoinRequests.Remove(item);
+                _context.SaveChanges();
+            }
+        }
     }
 }

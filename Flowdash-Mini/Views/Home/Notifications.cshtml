@@ -1,14 +1,78 @@
-﻿@*
+﻿@using Flowdash_Mini.ViewModels.Notifications
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
     ViewData["Title"] = "Notifications";
+    int x = 1;
 }
+@model List<NotificationVM>
+
+<div class="flex-grow-1">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold py-3 mb-4">Your Notifications</h4>
+        <div class="d-flex gap-3 align-items-center justify-content-center">
+            <a href="javascript:void(0);" class="refresh-btn btn btn-outline-secondary d-flex justify-content-center align-items-center gap-2">
+                <i class="bx bx-refresh-cw"></i> <span>Refresh</span>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <h5 class="card-header">View Notifications</h5>
+                <div class="card-body">
+                    <div class="table-responsive table-responsive text-nowrap">
+                        <table class="table table-bordered data-table-list">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        #
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Notification</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="m-0">Date & Time</h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="text-start"><h6 class="m-0">@(x++)</h6></td>
+                                        <td>
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <h6 class="m-0">@item.Text</h6>
+                                            </div>
+                                        </td>
+                                        <td><h6 class="m-0">@item.CreatedAt.ToString("dd MMM, yyyy hh:mm tt")</h6></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
     <script>
-        $(function () {
+        $(function() {
             $('#user-notifications-mbtn').addClass('active')
+            var latestNoti = '@(Model.FirstOrDefault()?.Id)';
+            var userId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+
+            if (!latestNoti || !userId) return;
+
+            var storageKey = 'LAST_NOTI_ID_USER_' + userId;
+            localStorage.setItem(storageKey, latestNoti);
+            $('#notification-badge').addClass('d-none');
         })
     </script>
 }
