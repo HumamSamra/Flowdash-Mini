@@ -1,21 +1,22 @@
 ﻿@using Flowdash_Mini.Enums
 @using Flowdash_Mini.Extensions
 @using Flowdash_Mini.ViewModels.Invites
-@using Flowdash_Mini.ViewModels.JoinRequests
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    ViewData["Title"] = "Invites";
+    ViewData["Title"] = "Project Invites";
     int x = 1;
 }
 @model List<UserInviteVM>
-
 
 <div class="flex-grow-1">
     <div class="d-flex justify-content-between align-items-center">
         <h4 class="fw-bold py-3 mb-4"><a href="/project" class="text-muted fw-light">Project /</a> Invites</h4>
         <div class="d-flex gap-3 align-items-center justify-content-center">
+            <a href="/project/members" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                <i class="bx bx-paper-plane"></i> <span>Invite Members</span>
+            </a>
             <a href="javascript:void(0);" class="refresh-btn btn btn-outline-secondary d-flex justify-content-center align-items-center gap-2">
                 <i class="bx bx-refresh-cw"></i> <span>Refresh</span>
             </a>
@@ -37,13 +38,10 @@
                                         <h6 class="m-0">Full name</h6>
                                     </th>
                                     <th>
-                                        <h6 class="m-0">Project Name</h6>
+                                        <h6 class="m-0">Invite Date</h6>
                                     </th>
                                     <th>
                                         <h6 class="m-0">Invited By</h6>
-                                    </th>
-                                    <th>
-                                        <h6 class="m-0">Invite Date</h6>
                                     </th>
                                     <th>
                                         <h6 class="m-0">Actions</h6>
@@ -69,13 +67,6 @@
                                             <td>
                                                 <div class="d-flex gap-2 align-items-center justify-content-start">
                                                     <h6 class="m-0">
-                                                        @item.Project.ProjectName
-                                                    </h6>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex gap-2 align-items-center justify-content-start">
-                                                    <h6 class="m-0">
                                                         @item.CreatedBy
                                                     </h6>
                                                 </div>
@@ -88,14 +79,13 @@
                                                     <a id="@item.Id" name="reject-req" class="d-flex align-items-center justify-content-center rounded-circle btn btn-outline-danger p-2">
                                                         <i class="bx bx-x"></i>
                                                     </a>
-                                                    <a id="@item.Id" name="accept-req" class="d-flex align-items-center justify-content-center rounded-circle btn btn-outline-success p-2">
-                                                        <i class="bx bx-check"></i>
-                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>
                                     }
+
                                 }
+
                             </tbody>
                         </table>
                     </div>
@@ -107,58 +97,19 @@
 
 @section Scripts {
     <script>
-        $('#invites-mbtn').addClass('active')
-
-        $(document).on('click', 'a[name="accept-req"]', function () {
-            Swal.fire({
-                title: "Are you sure?",
-                text: "This request will be accpeted and you will be added to the project",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Yes, accept it!"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '/home/acceptinvite/' + $(this).attr('id'),
-                        method: 'post',
-                    }).fail(xhr => {
-                        Swal.fire({
-                            title: "Oops..",
-                            text: `Error (${xhr.status}) ${xhr.responseText}`,
-                            icon: "error"
-                        });
-                    }).done((result) => {
-                        if(result.statusCode == 200) {
-                            Swal.fire({
-                                title: "Done!",
-                                text: "You are now part of the project!",
-                                icon: "success"
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: "Oops..",
-                                text: result.msg || "An error occurred...",
-                                icon: "error"
-                            })
-                        }
-                    })
-                }
-            });
-        });
+        $('#proj-invites-mbtn').addClass('active')
 
         $(document).on('click', 'a[name="reject-req"]', function () {
             Swal.fire({
                 title: "Are you sure?",
-                text: "This invite request will be rejected",
+                text: "This invite request will be cancelled",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: "Yes, reject it!"
+                confirmButtonText: "Yes, cancel it!"
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '/home/rejectinvite/' + $(this).attr('id'),
+                        url: '/project/cacnelinvite/' + $(this).attr('id'),
                         method: 'post',
                     }).fail(xhr => {
                         Swal.fire({
@@ -170,7 +121,7 @@
                         if(result.statusCode == 200) {
                             Swal.fire({
                                 title: "Done!",
-                                text: "Invite Rejected Successfully!",
+                                text: "Invite Request Cancelled Successfully!",
                                 icon: "success"
                             }).then(() => {
                                 window.location.reload();

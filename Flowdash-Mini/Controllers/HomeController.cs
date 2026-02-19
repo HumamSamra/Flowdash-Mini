@@ -8,6 +8,7 @@ using Flowdash_Mini.Models.Projects;
 using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
 using Flowdash_Mini.ViewModels.Accounts;
+using Flowdash_Mini.ViewModels.Invites;
 using Flowdash_Mini.ViewModels.Notifications;
 using Flowdash_Mini.ViewModels.Projects;
 using Flowdash_Mini.ViewModels.Security;
@@ -74,7 +75,74 @@ namespace Flowdash_Mini.Controllers
         [HttpGet("/Invites")]
         public IActionResult Invites()
         {
-            return View();
+            var list = _unitOfWork.Invites.GetAll(User.GetUserId())
+                .ToList();
+            return View(_mapper.Map<List<UserInviteVM>>(list));
+        }
+
+        [HttpPost("/home/acceptinvite/{id}")]
+        public JsonResult AcceptInvite(string id)
+        {
+            var inv = _unitOfWork.Invites.Get(new Guid(id));
+            if (inv == null)
+            {
+                return Json(new { statusCode = 404, msg = "Invite doesn't exist any more" });
+            }
+
+            if (User.GetUserId() != inv.UserId)
+            {
+                return Json(new { statusCode = 403, msg = "Unauthorized action detected" });
+            }
+
+            var project = _unitOfWork.Projects.GetById(inv.ProjectId);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project was note found" });
+            }
+
+            var member = new ProjectMember();
+            member.MemberId = inv.UserId;
+            project.Members.Add(member);
+            _unitOfWork.Projects.Update(project);
+            _unitOfWork.Invites.Delete(inv.Id);
+
+            var members = _unitOfWork.Members.GetAllByProjectCode(
+                project.ProjectCode).ToList();
+            var admins = members.Where(e => e.MemberType == MemberType.Admin
+                || e.MemberType == MemberType.Owner)
+                .ToList();
+            foreach (var item in admins)
+            {
+                _unitOfWork.Notifications.PushNotification(
+                    item.MemberId, $"{inv.User.FullName} has joined the project {project.ProjectName} by an invite from {inv.CreatedBy}");
+            }
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost("/home/rejectinvite/{id}")]
+        public JsonResult RejectInvite(string id)
+        {
+            var item = _unitOfWork.Invites.Get(new Guid(id));
+            if (item == null)
+            {
+                return Json(new { statusCode = 404, msg = "Invite doesn't exist any more" });
+            }
+
+            if (User.GetUserId() != item.UserId)
+            {
+                return Json(new { statusCode = 403, msg = "Unauthorized action detected" });
+            }
+
+            var project = _unitOfWork.Projects.GetById(item.ProjectId);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project was note found" });
+            }
+
+            _unitOfWork.Invites.Delete(item.Id);
+
+            return Json(new { statusCode = 200 });
         }
 
         [HttpGet("/security")]

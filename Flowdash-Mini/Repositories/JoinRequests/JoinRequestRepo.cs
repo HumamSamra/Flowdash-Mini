@@ -48,5 +48,12 @@ namespace Flowdash_Mini.Repositories.JoinRequests
             .Include(e => e.User)
             .Where(e => e.Project.ProjectCode == projectCode)
             .AsQueryable();
+
+        public ProjectJoinRequest? GetByUserId(Guid userId, string projectCode)
+            => _context.ProjectJoinRequests
+            .Include(e => e.User)
+            .Include(e => e.Project)
+            .FirstOrDefault(r => r.UserId == userId
+                && r.Project.ProjectCode == projectCode);
     }
 }

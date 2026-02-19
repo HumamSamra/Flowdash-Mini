@@ -19,14 +19,8 @@
         <div class="d-flex gap-3 align-items-center justify-content-center">
             @if (ViewBag.MemberType != MemberType.User && state == ProjectState.Private)
             {
-                <a href="javascript:void(0);" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
+                <a href="javascript:void(0);" id="invite-member" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
                     <i class="bx bx-envelope"></i> <span>Invite Members</span>
-                </a>
-            }
-            else if (state == ProjectState.Public)
-            {
-                <a href="javascript:void(0);" class="btn btn-primary d-flex justify-content-center align-items-center gap-2">
-                    <i class="bx bx-envelope"></i> <span>Add Members</span>
                 </a>
             }
             <a href="javascript:void(0);" class="refresh-btn btn btn-outline-secondary d-flex justify-content-center align-items-center gap-2">
@@ -96,9 +90,9 @@
                                                     <span class="badge bg-label-primary text-primary">User</span>
                                                 }
                                             </td>
-                                            <td class="text-center">
-                                                @if (ViewBag.MemberType == MemberType.Owner)
-                                                {
+                                            @if (ViewBag.MemberType == MemberType.Owner)
+                                            {
+                                                <td class="text-center">
                                                     @if (item.Member?.Id != User.GetUserId())
                                                     {
                                                         <div class="dropdown">
@@ -122,8 +116,8 @@
                                                             </div>
                                                         </div>
                                                     }
-                                                }
-                                            </td>
+                                                </td>
+                                            }
                                         </tr>
                                     }
 
@@ -141,6 +135,54 @@
 @section Scripts {
     <script>
         $('#members-mbtn').addClass('active')
+
+        $('#invite-member').on('click', function () {
+            Swal.fire({
+                title: "Invite Member",
+                input: "text",
+                inputAttributes: {
+                    autocapitalize: "off",
+                    autocomplete: "off",
+                    placeholder: 'Enter Member Username...'
+                },
+                showCancelButton: true,
+                confirmButtonText: "Send Invite",
+                showLoaderOnConfirm: true,
+                preConfirm: async (username) => {
+                    try {
+                        const result = await $.ajax({
+                            url: `/project/sendinvite/` + username,
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken':
+                                    $('input[name="__RequestVerificationToken"]').val()
+                            },
+                        });
+
+                        if (result.statusCode !== 200) {
+                            throw new Error(result.msg || "Unknown error occurred.");
+                        }
+
+                        return result;
+
+                    } catch (error) {
+                        const msg = error.message || error.responseText || error.statusText;
+                        Swal.showValidationMessage(msg);
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Invite Sent!",
+                        text: result.value.msg ?? "Invite has been sent successfully",
+                        icon: "success"
+                    }).then(() => {
+                        window.location.reload(true);
+                    });
+                }
+            });
+        });
 
         $(document).on('click', 'a[name="remove-member"]', function () {
                 Swal.fire({
@@ -181,43 +223,43 @@
                 });
             });
 
-            $(document).on('click', 'a[name="transfer-ownership"]', function () {
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "This is a dangerous area!\nYou can't undo this action!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Yes, transfer ownership!"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/project/transferownership/' + $(this).attr('id'),
-                            method: 'post',
-                        }).fail(xhr => {
+        $(document).on('click', 'a[name="transfer-ownership"]', function () {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This is a dangerous area!\nYou can't undo this action!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, transfer ownership!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/project/transferownership/' + $(this).attr('id'),
+                        method: 'post',
+                    }).fail(xhr => {
+                        Swal.fire({
+                            title: "Oops..",
+                            text: `Error (${xhr.status}) ${xhr.responseText}`,
+                            icon: "error"
+                        });
+                    }).done((result) => {
+                        if(result.statusCode == 200) {
+                            Swal.fire({
+                                title: "Done!",
+                                text: "Ownership Transferred Successfully!",
+                                icon: "success"
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
                             Swal.fire({
                                 title: "Oops..",
-                                text: `Error (${xhr.status}) ${xhr.responseText}`,
+                                text: result.msg || "An error occurred...",
                                 icon: "error"
-                            });
-                        }).done((result) => {
-                            if(result.statusCode == 200) {
-                                Swal.fire({
-                                    title: "Done!",
-                                    text: "Ownership Transferred Successfully!",
-                                    icon: "success"
-                                }).then(() => {
-                                    window.location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Oops..",
-                                    text: result.msg || "An error occurred...",
-                                    icon: "error"
-                                })
-                            }
-                        })
-                    }
-                });
+                            })
+                        }
+                    })
+                }
             });
+        });
     </script>
 }

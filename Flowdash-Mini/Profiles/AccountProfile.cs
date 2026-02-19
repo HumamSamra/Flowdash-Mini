@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Flowdash_Mini.Models.Accounts;
 using Flowdash_Mini.ViewModels.Accounts;
+using Flowdash_Mini.ViewModels.Invites;
 
 namespace Flowdash_Mini.Profiles
 {
@@ -14,6 +15,8 @@ namespace Flowdash_Mini.Profiles
             CreateMap<AppUser, UserVM>().ReverseMap();
             CreateMap<AppUser, EditUserVM>().ReverseMap();
             CreateMap<AppUser, CreateUserVM>().ReverseMap();
+
+            CreateMap<UserInvite, UserInviteVM>().ReverseMap();
         }
     }
 }

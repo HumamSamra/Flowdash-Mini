@@ -70,13 +70,20 @@
                 </a>
             </li>
 
-            @if (ViewBag.MemberType == MemberType.Owner)
+            @if (ViewBag.MemberType == MemberType.Owner || ViewBag.MemberType == MemberType.Admin)
             {
                 <li class="menu-item" id="jr-mbtn">
                     <a href="/project/requests"
                        class="menu-link">
                         <i class='menu-icon tf-icons bx bx-user-plus'></i>
                         <div>Join Requests</div>
+                    </a>
+                </li>
+                <li class="menu-item" id="proj-invites-mbtn">
+                    <a href="/project/invites"
+                       class="menu-link">
+                        <i class='menu-icon tf-icons bx bx-paper-plane'></i>
+                        <div>Project Invites</div>
                     </a>
                 </li>
             }
@@ -137,13 +144,16 @@
         else
         {
             <li class="menu-header small text-uppercase"><span class="menu-header-text">Important</span></li>
-            <li class="menu-item" id="user-invites-mbtn">
-                <a href="/invites"
-                   class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-send"></i>
-                    <div>Invites</div>
-                </a>
-            </li>
+            @if (ViewBag.MemberType == null)
+            {
+                <li class="menu-item" id="invites-mbtn">
+                    <a href="/invites"
+                       class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-send"></i>
+                        <div>Invites</div>
+                    </a>
+                </li>
+            }
             <li class="menu-item" id="user-notifications-mbtn">
                 <a href="/notifications"
                    class="menu-link">

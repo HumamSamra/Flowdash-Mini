@@ -20,8 +20,8 @@ namespace Flowdash_Mini.Context
         public DbSet<ProjectAnnouncement> ProjectAnnouncements { get; set; }
         public DbSet<ProjectMember> ProjectMembers { get; set; }
         public DbSet<ProjectJoinRequest> ProjectJoinRequests { get; set; }
-        public DbSet<ProjectInvite> ProjectInvites { get; set; }
         public DbSet<ProjectLog> ProjectLogs { get; set; }
+        public DbSet<UserInvite> UserInvites { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
 

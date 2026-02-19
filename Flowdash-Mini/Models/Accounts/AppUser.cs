@@ -13,7 +13,7 @@ namespace Flowdash_Mini.Models.Accounts
 
         public ICollection<ProjectMember> Projects { get; set; } = new List<ProjectMember>();
         public ICollection<ProjectJoinRequest> JoinRequests { get; set; } = new List<ProjectJoinRequest>();
-        public ICollection<ProjectInvite> ProjectInvites { get; set; } = new List<ProjectInvite>();
+        public ICollection<UserInvite> Invites { get; set; } = new List<UserInvite>();
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

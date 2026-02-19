@@ -9,6 +9,7 @@ using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
 using Flowdash_Mini.ViewModels.Activities;
 using Flowdash_Mini.ViewModels.Announcements;
+using Flowdash_Mini.ViewModels.Invites;
 using Flowdash_Mini.ViewModels.JoinRequests;
 using Flowdash_Mini.ViewModels.Members;
 using Flowdash_Mini.ViewModels.Projects;
@@ -85,14 +86,99 @@ namespace Flowdash_Mini.Controllers
                 .Where(e => e.TaskBoard.ProjectId == project.Id);
             ViewBag.FinishedTasks = tasks.Where(e => e.Status == AppTaskStatus.Completed).Count();
             ViewBag.InProgressTasks = tasks.Where(e => e.Status == AppTaskStatus.InProgress).Count();
+            ViewBag.Tasks = _mapper.Map<List<TaskVM>>(tasks);
 
             return View(_mapper.Map<ProjectVM>(project));
         }
 
         [HttpGet]
+        public IActionResult Invites()
+        {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            if (ViewBag.MemberType != MemberType.Owner
+                && ViewBag.MemberType != MemberType.Admin)
+            {
+                return Redirect("/project");
+            }
+            var invites = _unitOfWork.Invites.GetAllByProjectCode(code);
+            return View(_mapper.Map<List<UserInviteVM>>(invites));
+        }
+
+        [HttpPost("/Project/SendInvite/{username}")]
+        public JsonResult SendInvite(string username)
+        {
+            var recUser = _userManager.Users.FirstOrDefault(e => e.UserName == username);
+            if (recUser == null)
+            {
+                return Json(new { statusCode = 404, msg = "User was not found" });
+            }
+
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var inv = _unitOfWork.JoinRequests.GetByUserId(recUser.Id, code);
+            if (inv != null)
+            {
+                return Json(new { statusCode = 400, msg = "Invite has been already sent" });
+            }
+
+            var user = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (user == null || (user.MemberType != MemberType.Admin
+                && user.MemberType != MemberType.Owner))
+            {
+                return Json(new { statusCode = 403, msg = "Unauthorized action detected" });
+            }
+
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            var invite = new UserInvite();
+            invite.CreatedBy = user.Member.FullName;
+            invite.UserId = recUser.Id;
+            invite.ProjectId = project.Id;
+            _unitOfWork.Invites.Add(invite);
+
+            _unitOfWork.Notifications.PushNotification(
+                invite.UserId, $"You have received an invitation to join {project.ProjectName} by {invite.CreatedBy}");
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost("/Project/CacnelInvite/{id}")]
+        public JsonResult CacnelInvite(string id)
+        {
+            var inv = _unitOfWork.Invites.Get(new Guid(id));
+            if (inv == null)
+            {
+                return Json(new { statusCode = 404, msg = "Invite not found" });
+            }
+
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var user = _unitOfWork.Members.GetByUserId(User.GetUserId(), code);
+            if (user == null || (user.MemberType != MemberType.Admin
+                && user.MemberType != MemberType.Owner))
+            {
+                return Json(new { statusCode = 403, msg = "Unauthorized action detected" });
+            }
+
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            _unitOfWork.Invites.Delete(inv.Id);
+
+            return Json(new { statusCode = 200 });
+
+        }
+
+        [HttpGet]
         public IActionResult Requests()
         {
-            if (ViewBag.MemberType != MemberType.Owner)
+            if (ViewBag.MemberType != MemberType.Owner
+                && ViewBag.MemberType != MemberType.Admin)
             {
                 return Redirect("/project");
             }
