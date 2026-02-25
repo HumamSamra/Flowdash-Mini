@@ -1,12 +1,14 @@
 ﻿using Flowdash_Mini.Context;
 using Flowdash_Mini.Models.Accounts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Flowdash_Mini.Extensions
 {
     public static class AuthExtension
     {
-        public static void InitializeAuthentication(this IServiceCollection services)
+        public static void InitializeAuthentication(this IServiceCollection services, IConfiguration config)
         {
             services.AddIdentity<AppUser, AppRole>(opt =>
             {
@@ -47,7 +49,16 @@ namespace Flowdash_Mini.Extensions
             });
 
             services.AddAuthentication()
-            .AddCookie("IdentityCookie");
+            .AddCookie("IdentityCookie")
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtKey"]!)),
+                };
+            });
         }
     }
 }

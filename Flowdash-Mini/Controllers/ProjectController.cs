@@ -24,7 +24,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Flowdash_Mini.Controllers
 {
     [Authorize]
-    public class ProjectController : Controller
+    public class ProjectController : _BaseController
     {
         private const string CookieName = "MEMORY_PROJECT_CODE";
         private readonly UserManager<AppUser> _userManager;

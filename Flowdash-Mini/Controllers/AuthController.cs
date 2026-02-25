@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Flowdash_Mini.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController : _BaseController
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;

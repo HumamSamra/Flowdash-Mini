@@ -3,6 +3,7 @@ using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.CaptchaService;
 using Flowdash_Mini.Services.MailService;
 using Flowdash_Mini.Services.StorageService;
+using Flowdash_Mini.Services.TokenService;
 using System.Reflection;
 
 namespace Flowdash_Mini.Extensions
@@ -17,6 +18,7 @@ namespace Flowdash_Mini.Extensions
             services.AddScoped<IStorageService, StorageService>();
             services.AddScoped<ISmtpService, SmtpService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ITokenService, TokenService>();
 
             services.Configure<CaptchaOptions>(
                 config.GetSection("Captcha"));

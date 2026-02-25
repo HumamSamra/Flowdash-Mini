@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Flowdash_Mini.Classes;
+using Flowdash_Mini.Controllers;
 using Flowdash_Mini.Enums;
 using Flowdash_Mini.Repositories;
 using Flowdash_Mini.Services.MailService;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Flowdash_Mini.Areas.Admin.Controllers
 {
     [Area("Admin"), Authorize(Roles = nameof(UserType.Admin))]
-    public class AppSettingsController : Controller
+    public class AppSettingsController : _BaseController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISmtpService _smtp;

@@ -1,10 +1,11 @@
+using Flowdash_Mini.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Talabat.Controllers
 {
-    public class ErrorController : Controller
+    public class ErrorController : _BaseController
     {
 
         [AllowAnonymous]

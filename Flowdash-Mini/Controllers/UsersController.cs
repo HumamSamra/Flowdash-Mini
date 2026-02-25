@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Flowdash_Mini.Controllers;
 using Flowdash_Mini.Enums;
 using Flowdash_Mini.Extensions;
 using Flowdash_Mini.Models.Accounts;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Flowdash_Mini.Areas.Admin.Controllers
 {
     [Authorize(Roles = nameof(UserType.Admin))]
-    public class UsersController : Controller
+    public class UsersController : _BaseController
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<AppRole> _roleManager;

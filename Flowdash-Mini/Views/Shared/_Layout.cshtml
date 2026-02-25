@@ -1,11 +1,13 @@
 ﻿@using System.Globalization
 @using Microsoft.Extensions.Localization
 @using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Hosting
 @{
     string lang = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
     bool hideLayout = (bool?)TempData["HideLayout"] ?? false;
 }
 @inject IOptions<CaptchaOptions> captcha
+@inject IWebHostEnvironment env
 
 <!DOCTYPE html>
 <html lang="en"
@@ -111,6 +113,16 @@
     else
     {
         @RenderBody()
+    }
+
+    @if (env.IsDevelopment())
+    {
+        <script>
+            if (!sessionStorage.getItem("SWAGGER_OPENED")){
+                window.open("/swagger/index.html", "_blank")
+                sessionStorage.setItem("SWAGGER_OPENED", true)
+            }
+        </script>
     }
 
     <!-- Core JS -->

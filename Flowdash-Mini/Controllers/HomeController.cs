@@ -21,7 +21,7 @@ using System.Diagnostics;
 namespace Flowdash_Mini.Controllers
 {
     [Authorize]
-    public class HomeController : Controller
+    public class HomeController : _BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private const string CookieName = "MEMORY_PROJECT_CODE";
