@@ -10,6 +10,8 @@ namespace Flowdash_Mini.Profiles
         public AccountProfile()
         {
             CreateMap<AppUser, RegisterVM>().ReverseMap();
+            CreateMap<AppUser, ApiUserVM>().ReverseMap();
+            CreateMap<AppUser, CredentialsVM>().ReverseMap();
             CreateMap<AppUser, LoginVM>().ReverseMap();
             CreateMap<AppUser, AppUserVM>().ReverseMap();
             CreateMap<AppUser, UserVM>().ReverseMap();

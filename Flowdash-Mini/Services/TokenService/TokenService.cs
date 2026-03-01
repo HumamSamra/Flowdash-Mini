@@ -18,7 +18,7 @@ namespace Flowdash_Mini.Services.TokenService
         }
         public async Task<string> CreateAsync(AppUser user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtTokenKey"]!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtKey"]!));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
             List<Claim> claims = new() {

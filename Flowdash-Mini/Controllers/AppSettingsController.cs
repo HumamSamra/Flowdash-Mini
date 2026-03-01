@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Flowdash_Mini.Areas.Admin.Controllers
 {
-    [Area("Admin"), Authorize(Roles = nameof(UserType.Admin))]
+    [Authorize(Roles = nameof(UserType.Admin))]
     public class AppSettingsController : _BaseController
     {
         private readonly IUnitOfWork _unitOfWork;

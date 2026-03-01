@@ -1,0 +1,86 @@
+﻿@using Flowdash_Mini.ViewModels.Settings
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Socials";
+}
+@model AppSettingSocialVM
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><a href="/" class="text-muted fw-light">Dashboard /</a> Socials</h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="/appsettings"><i class="bx bx-cog me-1"></i> Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/appsettings/socials"><i class="bx bx-cube-alt me-1"></i> Socials</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/appsettings/smtp"><i class="bx bx-envelope me-1"></i> Mail Service</a>
+                </li>
+            </ul>
+            <div class="card">
+                <h5 class="card-header">Social Media</h5>
+                <div class="card-body">
+                    <form id="formAccountSettings" action="/appsettings/socials" method="POST" novalidate>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="input-field-1" class="form-label">WhatsApp</label>
+                                <input dir="auto" class="form-control" id="input-field-1"
+                                       type="text"
+                                       asp-for="WhatsApp" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="input-field-2" class="form-label">Facebook</label>
+                                <input dir="auto" class="form-control"
+                                       type="text" id="input-field-2"
+                                       asp-for="Facebook" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="input-field-3" class="form-label">Instagram</label>
+                                <input dir="auto" class="form-control"
+                                       type="text" id="input-field-3"
+                                       asp-for="Instagram" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="input-field-4" class="form-label">LinedIn</label>
+                                <input dir="auto" class="form-control"
+                                       type="text" id="input-field-4"
+                                       asp-for="LinkedIn" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="input-field-5" class="form-label">Tiktok</label>
+                                <input dir="auto" class="form-control"
+                                       id="input-field-5"
+                                       type="text"
+                                       asp-for="Tiktok" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="input-field-6" class="form-label">Youtube</label>
+                                <input dir="auto" class="form-control"
+                                       type="text"
+                                       id="input-field-6"
+                                       asp-for="Youtube" />
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-primary me-2">Save changes</button>
+                            <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /Account -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#settings2-mbtn').addClass('active');
+    </script>
+}

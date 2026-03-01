@@ -1,0 +1,139 @@
+﻿@using Flowdash_Mini.ViewModels.Settings
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Socials";
+}
+@model AppSettingSmtpVM
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><a href="/" class="text-muted fw-light">Dashboard /</a> Mail Service</h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="/appsettings"><i class="bx bx-cog me-1"></i> Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/appsettings/socials"><i class="bx bx-cube-alt me-1"></i> Socials</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/appsettings/smtp"><i class="bx bx-envelope me-1"></i> Mail Service</a>
+                </li>
+            </ul>
+            <div class="card mb-4">
+                <h5 class="card-header">Mail Service</h5>
+                <div class="card-body">
+                    <form id="formAccountSettings" action="/appsettings/smtp" novalidate method="POST">
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="firstName" class="form-label">Name</label>
+                                <input dir="auto" class="form-control"
+                                       type="text"
+                                       asp-for="SmtpName" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="firstName" class="form-label">Host</label>
+                                <input dir="auto" class="form-control"
+                                       type="text"
+                                       asp-for="SmtpHost" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="firstName" class="form-label">E-Mail</label>
+                                <input dir="auto" class="form-control"
+                                       type="email"
+                                       asp-for="SmtpEmail" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="firstName" class="form-label">Port</label>
+                                <input dir="auto" class="form-control"
+                                       type="number"
+                                       asp-for="SmtpPort" />
+                            </div>
+                            <div class="mb-3 form-password-toggle">
+                                <div class="input-group input-group-merge">
+                                    <input dir="auto" type="password"
+                                           asp-for="SmtpPassword"
+                                           class="form-control"
+                                           placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                           aria-describedby="password" required />
+                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input dir="auto" asp-for="SmtpSsl" class="form-check-input" type="checkbox" id="remember-me" />
+                                    <label class="form-check-label" for="remember-me"> SSL Enabled </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-primary me-2">Save changes</button>
+                            <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /Account -->
+            </div>
+            <div class="card">
+                <h5 class="card-header">Send Custom Mail</h5>
+                <div class="card-body">
+                    <div class="mb-3 col-12 mb-0">
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading fw-bold mb-1">Alert - Custom SMTP Message</h6>
+                            <p class="mb-0">This will send a custom text message to the provided e-mail.</p>
+                        </div>
+                    </div>
+                    <form id="test-smtp" class="needs-validation extra-validate" novalidate>
+                        <input dir="auto" class="form-control mb-3" type="text" placeholder="Subject" name="subject" value="Hello Sir!" required />
+                        <textarea class="form-control mb-3" type="text" placeholder="Message" name="message" required>Hello, This is a test message!</textarea>
+                        <input dir="auto" class="form-control mb-3" type="email" placeholder="Email" name="email" required />
+                        <button type="submit" class="btn btn-primary deactivate-account">Send Mail</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#settings3-mbtn').addClass('active');
+
+        $('#test-smtp').on('submit', function (ev) {
+            ev.preventDefault();
+
+            Swal.fire({
+                title: "Mail Service",
+                text: "Are you sure you want to send this message?",
+                showCancelButton: true,
+                confirmButtonText: "Yes, send it",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/appsettings/sendsmtp',
+                        method: 'post',
+                        data: $('#test-smtp').serialize(),
+                        success: function (res) {
+                            if (res != null) {
+                                Swal.fire({
+                                    title: "Oops..",
+                                    text: res.message.replace(/'/g, "\\'"),
+                                    icon: "info"
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Looks good!",
+                                    text: "Your message has arrived!",
+                                    icon: "success"
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+        });
+    </script>
+}
