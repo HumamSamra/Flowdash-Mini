@@ -295,7 +295,7 @@ namespace Flowdash_Mini.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction(nameof(Login));
+            return Redirect("/auth/login");
         }
     }
 }

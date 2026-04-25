@@ -1,0 +1,60 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Project Membership";
+}
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Delete Project</h5>
+        <small class="text-muted float-end">As of today - @DateTime.Now.ToString("dd MMM, yyyy")</small>
+    </div>
+    <div class="card-body">
+        <form class="extra-validate" novalidate id="leave-project">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="agreed" id="flexCheckChecked" required>
+                <label class="form-check-label" for="flexCheckChecked">
+                    I understand that once I leave this project there's no going back
+                </label>
+            </div>
+            <button type="submit" class="btn btn-danger">Leave Project</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Begin Script
+            $('#membership-mbtn').addClass('active')
+
+            $('#leave-project').on('submit', function(e) {
+                e.preventDefault()
+                Swal.fire({
+                title: "Delete Project",
+                text: "Are you sure you want to leave this project?",
+                showCancelButton: true,
+                confirmButtonText: "Yes, leave proejct",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/project/leaveproject',
+                            method: 'post',
+                            success: function (res) {
+                                if (res.statusCode != 200) {
+                                    Swal.fire({
+                                        title: "Oops..",
+                                        text: res.msg,
+                                        icon: "info"
+                                    });
+                                } else {
+                                    window.location.href = '/selectproject'
+                                }
+                            }
+                        })
+                    }
+                });
+            })
+        });
+    </script>
+}

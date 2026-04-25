@@ -5,8 +5,6 @@ using Flowdash_Mini.Services.CaptchaService;
 using Flowdash_Mini.Services.MailService;
 using Flowdash_Mini.Services.TokenService;
 using Flowdash_Mini.ViewModels.Accounts;
-using Flowdash_Mini.ViewModels.Security;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -166,38 +164,6 @@ namespace Flowdash_Mini.Controllers.API
                         new List<string>() { user.Email! });
             }
             return Ok("Password reset message has been sent successfully");
-        }
-
-        [HttpPost("ResetPassword")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<ActionResult> ChangePassword(ChangePasswordVM model)
-        {
-            // var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
-            // if (!await _captcha.VerifyAsync(reCaptchaToken))
-            // {
-            //     ModelState.AddModelError(string.Empty, "Invalid reCaptcha token");
-            //     return View(model);
-            // }
-
-            var user = await _userManager.GetUserAsync(User);
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.Password);
-            if (!result.Succeeded)
-            {
-                string msg = "";
-                foreach (var error in result.Errors)
-                {
-                    msg += error.Description + Environment.NewLine;
-                }
-                return BadRequest(msg);
-            }
-
-            if (model.LogEveryoneOut)
-            {
-                // Logout everyone with this account
-                await _userManager.UpdateSecurityStampAsync(user);
-            }
-
-            return Ok("Password has been successfully reset");
         }
     }
 }

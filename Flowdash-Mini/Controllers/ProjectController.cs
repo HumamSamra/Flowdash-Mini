@@ -92,6 +92,12 @@ namespace Flowdash_Mini.Controllers
         }
 
         [HttpGet]
+        public IActionResult Membership()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult Invites()
         {
             var code = CookieHandler.Get(CookieName, HttpContext)!;
@@ -368,8 +374,16 @@ namespace Flowdash_Mini.Controllers
         [HttpGet]
         public IActionResult Progress()
         {
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Redirect("/");
+            }
+
             var taskBoards = _unitOfWork.TaskBoards.GetAll()
                 .Include(e => e.Tasks)
+                .Where(e => e.ProjectId == project.Id)
                 .ToList();
             return View(_mapper.Map<List<TaskBoardVM>>(taskBoards));
         }
@@ -949,8 +963,6 @@ namespace Flowdash_Mini.Controllers
                 return View(model);
             }
 
-
-
             project.ModifiedBy = User.GetUserName();
             project.ModifiedAt = DateTime.UtcNow;
 
@@ -964,6 +976,54 @@ namespace Flowdash_Mini.Controllers
                  member.MemberType, $"Project was modified successfully"));
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public JsonResult DeleteProject()
+        {
+            if (ViewBag.MemberType != MemberType.Owner)
+            {
+                return Json(new { statusCode = 403, msg = "UnAuthorized" });
+            }
+
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            _unitOfWork.Projects.Delete(project.Id);
+            CookieHandler.Delete(CookieName, HttpContext);
+
+            return Json(new { statusCode = 200 });
+        }
+
+        [HttpPost]
+        public JsonResult LeaveProject()
+        {
+            if (ViewBag.MemberType == MemberType.Owner)
+            {
+                return Json(new { statusCode = 403, msg = "UnAuthorized" });
+            }
+
+            var code = CookieHandler.Get(CookieName, HttpContext)!;
+            var project = _unitOfWork.Projects.GetByCode(code);
+            if (project == null)
+            {
+                return Json(new { statusCode = 404, msg = "Project not found" });
+            }
+
+            var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.Id);
+            if (member == null)
+            {
+                return Json(new { statusCode = 404, msg = "Member not found" });
+            }
+
+            _unitOfWork.Members.Delete(member.Id);
+            CookieHandler.Delete(CookieName, HttpContext);
+
+            return Json(new { statusCode = 200 });
         }
     }
 }
