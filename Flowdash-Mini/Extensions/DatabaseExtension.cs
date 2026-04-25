@@ -26,10 +26,9 @@ namespace Flowdash_Mini.Extensions
 
                 await context.Database.MigrateAsync();
 
+                SeedData.SeedAppSettings(unitOfWork);
                 await SeedData.SeedRolesAsync(roleManager);
                 await SeedData.SeedUsersAsync(userManager);
-
-                SeedData.SeedAppSettings(unitOfWork);
             }
         }
     }

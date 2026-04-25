@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Flowdash_Mini.Controllers.API
 {
     [Route("API/[controller]"), ApiController, Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class HomeController : Controller
+    public class HomeController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
@@ -44,7 +44,7 @@ namespace Flowdash_Mini.Controllers.API
                 .ThenByDescending(e => e.Members.First(
                     e => e.MemberId == User.GetUserId()).MemberType == MemberType.Admin);
 
-            return View(_mapper.Map<List<ProjectVM>>(projects));
+            return _mapper.Map<List<ProjectVM>>(projects);
         }
 
         [HttpGet("GetInvites")]
@@ -52,7 +52,7 @@ namespace Flowdash_Mini.Controllers.API
         {
             var list = _unitOfWork.Invites.GetAll(User.GetUserId())
                 .ToList();
-            return View(_mapper.Map<List<UserInviteVM>>(list));
+            return _mapper.Map<List<UserInviteVM>>(list);
         }
 
         [HttpPost("AcceptInvite/{id}")]
@@ -99,29 +99,29 @@ namespace Flowdash_Mini.Controllers.API
         [HttpPost("RejectInvite/{id}")]
         public ActionResult RejectInvite(string id)
         {
-            var item = _unitOfWork.Invites.Get(new Guid(id));
-            if (item == null)
+            var inv = _unitOfWork.Invites.Get(new Guid(id));
+            if (inv == null)
             {
                 return NotFound("Invite doesn't exist any more");
             }
 
-            if (User.GetUserId() != item.UserId)
+            if (User.GetUserId() != inv.UserId)
             {
                 return Unauthorized("Unauthorized action detected");
             }
 
-            var project = _unitOfWork.Projects.GetById(item.ProjectId);
+            var project = _unitOfWork.Projects.GetById(inv.ProjectId);
             if (project == null)
             {
                 return NotFound("Project was not found");
             }
 
-            _unitOfWork.Invites.Delete(item.Id);
+            _unitOfWork.Invites.Delete(inv.Id);
 
             return Ok("Invite rejected successfully");
         }
 
-        [HttpPost("JoinProject/{projCode}")]
+        [HttpPost("JoinProject")]
         public ActionResult JoinProject(string projCode)
         {
             if (string.IsNullOrWhiteSpace(projCode))

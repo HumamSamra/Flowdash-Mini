@@ -116,7 +116,7 @@
                                     @if (item.Members.First(e => e.Member.Id == User.GetUserId()).MemberType == MemberType.Owner)
                                     {
                                         <a class="dropdown-item text-danger d-flex gap-2 align-items-center"
-                                           href="javascript:void(0);">
+                                               href="/setproject/@item.Id?returnUrl=/project/manage">
                                             <i class='bx bx-trash'></i>
                                             <span>Delete Project</span>
                                         </a>

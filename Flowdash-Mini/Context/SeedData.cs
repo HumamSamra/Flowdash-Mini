@@ -50,6 +50,16 @@ namespace Flowdash_Mini.Context
                 return;
             }
 
+            var sys = new AppRole()
+            {
+                Name = nameof(UserType.System),
+                CreatedAt = DateTime.Now,
+                ModifiedAt = DateTime.Now,
+                CreatedBy = nameof(UserType.Migration),
+                ModifiedBy = nameof(UserType.Migration),
+            };
+            await roleManager.CreateAsync(sys);
+
             var migration = new AppRole()
             {
                 Name = nameof(UserType.Migration),

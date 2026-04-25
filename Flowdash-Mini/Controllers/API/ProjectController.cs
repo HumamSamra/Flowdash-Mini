@@ -8,7 +8,6 @@ using Flowdash_Mini.Repositories;
 using Flowdash_Mini.ViewModels.Announcements;
 using Flowdash_Mini.ViewModels.Members;
 using Flowdash_Mini.ViewModels.TaskBoards;
-using Flowdash_Mini.ViewModels.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Flowdash_Mini.Controllers.API
 {
     [Route("API/[controller]"), ApiController, Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ProjectController : Controller
+    public class ProjectController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
@@ -67,7 +66,7 @@ namespace Flowdash_Mini.Controllers.API
                             .Include(e => e.Tasks)
                             .Where(e => e.ProjectId == new Guid(projectId))
                             .ToList();
-            return View(_mapper.Map<List<TaskBoardVM>>(taskBoards));
+            return _mapper.Map<List<TaskBoardVM>>(taskBoards);
         }
 
         [HttpGet("GetTaskboard")]
@@ -78,11 +77,7 @@ namespace Flowdash_Mini.Controllers.API
             {
                 return NotFound("Taskboard not found");
             }
-
-            var t = _unitOfWork.Tasks.GetAll()
-                .Where(e => e.TaskBoardId == taskBoard.Id)
-                .ToList();
-            return View(_mapper.Map<List<TaskVM>>(t));
+            return _mapper.Map<TaskBoardVM>(taskBoard);
         }
 
         [HttpPost("SaveSort")]
@@ -113,7 +108,7 @@ namespace Flowdash_Mini.Controllers.API
             var member = _unitOfWork.Members.GetByUserId(User.GetUserId(), project.ProjectCode);
             if (member == null)
             {
-                return Json(new { statusCode = 404, msg = "User was not found" });
+                return NotFound("User was not found");
             }
 
             item.Status = dto.Status;

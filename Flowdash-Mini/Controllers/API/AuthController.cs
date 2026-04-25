@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Flowdash_Mini.Dtos.Accounts;
 using Flowdash_Mini.Enums;
 using Flowdash_Mini.Models.Accounts;
 using Flowdash_Mini.Services.CaptchaService;
@@ -14,7 +15,7 @@ using System.Text;
 namespace Flowdash_Mini.Controllers.API
 {
     [Route("API/[controller]"), ApiController]
-    public class AuthController : Controller
+    public class AuthController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
@@ -140,15 +141,10 @@ namespace Flowdash_Mini.Controllers.API
         }
 
         [HttpPost("ForgotPassword")]
-        public async Task<ActionResult> ForgotPassword(string email)
+        [AllowAnonymous]
+        public async Task<ActionResult> ForgotPassword([FromBody] ForgotPwdDto dto)
         {
-            // var reCaptchaToken = HttpContext.Request.Form["g-recaptcha-response"].ToString();
-            // if (!await _captcha.VerifyAsync(reCaptchaToken))
-            // {
-            //     return Json(new { statusCode = 400, msg = "Invalid reCaptcha token" });
-            // }
-
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(dto.Email);
             if (user != null)
             {
                 var confirmationToken = await _userManager.GeneratePasswordResetTokenAsync(user);

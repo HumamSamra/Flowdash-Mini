@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Flowdash_Mini.Controllers.API
 {
     [Route("API/[controller]"), ApiController, Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class UserController : Controller
+    public class UserController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
@@ -30,10 +30,9 @@ namespace Flowdash_Mini.Controllers.API
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound();
+                return NotFound("User not found");
             }
-            var userVM = _mapper.Map<UserVM>(user);
-            return View(userVM);
+            return _mapper.Map<UserVM>(user);
         }
 
         [HttpPost("Update")]
@@ -58,7 +57,7 @@ namespace Flowdash_Mini.Controllers.API
         }
 
         [HttpPost("ChangePassword")]
-        public async Task<ActionResult> ChangePassword(ChangePasswordVM model)
+        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordVM model)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -84,6 +83,5 @@ namespace Flowdash_Mini.Controllers.API
 
             return Ok("Password has been successfully reset");
         }
-
     }
 }

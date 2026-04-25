@@ -54,9 +54,9 @@ namespace Flowdash_Mini.Services.MailService
                               <div style='max-width:600px; margin:auto; background:#fff; padding:30px; border-radius:8px;'>
     
                                 <div style='text-align:center;'>
-                                  <img src='https://{_config["WebDomain"]}/images/logo.png'
+                                  <img src='{_config["WebDomain"]}images/logo.png'
                                        alt='Flowdash'
-                                       style='width:120px; margin-bottom:10px;' />
+                                       style='width:60px; margin-bottom:10px;' />
                                   <h1 style='margin:0; color:#333;'>Flowdash</h1>
                                 </div>
 
