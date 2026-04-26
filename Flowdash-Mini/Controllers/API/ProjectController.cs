@@ -7,7 +7,9 @@ using Flowdash_Mini.Models.Projects;
 using Flowdash_Mini.Repositories;
 using Flowdash_Mini.ViewModels.Announcements;
 using Flowdash_Mini.ViewModels.Members;
+using Flowdash_Mini.ViewModels.Projects;
 using Flowdash_Mini.ViewModels.TaskBoards;
+using Flowdash_Mini.ViewModels.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,10 +32,22 @@ namespace Flowdash_Mini.Controllers.API
             _unitOfWork = unitOfWork;
         }
 
+        [HttpGet("GetProject/{id}")]
+        public ActionResult<ProjectVM> GetProject(string id)
+        {
+            var result = _unitOfWork.Projects.GetById(new Guid(id));
+            if (result == null)
+            {
+                return NotFound("Project not found");
+            }
+            return _mapper.Map<ProjectVM>(result);
+        }
+
         [HttpGet("GetAnnouncements/{projectId}")]
         public ActionResult<List<ProjectAnnouncementVM>> GetAnnouncements(string projectId)
         {
             var list = _unitOfWork.Announcements.GetAll()
+                .Include(e => e.Project)
                 .Where(e => e.ProjectId == new Guid(projectId))
                 .ToList();
 
@@ -59,7 +73,7 @@ namespace Flowdash_Mini.Controllers.API
             return _mapper.Map<List<ProjectMemberVM>>(projectMembers);
         }
 
-        [HttpGet("GetTaskboards")]
+        [HttpGet("GetTaskboards/{projectId}")]
         public ActionResult<List<TaskBoardVM>> GetTaskBoards(string projectId)
         {
             var taskBoards = _unitOfWork.TaskBoards.GetAll()
@@ -67,6 +81,15 @@ namespace Flowdash_Mini.Controllers.API
                             .Where(e => e.ProjectId == new Guid(projectId))
                             .ToList();
             return _mapper.Map<List<TaskBoardVM>>(taskBoards);
+        }
+
+        [HttpGet("GetTasks/{taskBoardId}")]
+        public ActionResult<List<TaskVM>> GetTasks(string taskBoardId)
+        {
+            var tasks = _unitOfWork.Tasks.GetAll()
+                            .Where(e => e.TaskBoardId == new Guid(taskBoardId))
+                            .ToList();
+            return _mapper.Map<List<TaskVM>>(tasks);
         }
 
         [HttpGet("GetTaskboard")]
@@ -96,12 +119,12 @@ namespace Flowdash_Mini.Controllers.API
         }
 
         [HttpPost("SetTaskStatus")]
-        public ActionResult SetTaskStatus(UpdateTaskDto dto)
+        public ActionResult SetTaskStatus([FromBody] UpdateTaskDto dto)
         {
             var item = _unitOfWork.Tasks.GetById(dto.Id);
             if (item == null)
             {
-                return BadRequest("Task was not found");
+                return NotFound("Task was not found");
             }
 
             var project = item.TaskBoard.Project;

@@ -5,9 +5,9 @@ namespace Flowdash_Mini.Enums
     public enum AppTaskStatus
     {
         [Display(Name = "In Progress")]
-        InProgress,
+        InProgress = 0,
 
         [Display(Name = "Completed")]
-        Completed
+        Completed = 1
     }
 }

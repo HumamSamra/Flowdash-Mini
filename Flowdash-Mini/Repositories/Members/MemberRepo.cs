@@ -39,6 +39,7 @@ namespace Flowdash_Mini.Repositories.Members
         public ProjectMember? GetByUserId(Guid userId, string projectCode)
             => _context.ProjectMembers
             .Include(e => e.Project)
+            .Include(e => e.Member)
             .FirstOrDefault(e => e.MemberId == userId
                 && e.Project.ProjectCode == projectCode);
 
